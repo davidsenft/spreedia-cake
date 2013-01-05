@@ -1,0 +1,20 @@
+Database changes:
+
+- all ID fields to 'id' and 'xxx_id' except for status and parent
+- rename dollarKeys table to prices (and in other tables, price_id)
+- merge sales and events into activity
+   - rename events to activitys, add 'activityType' w/ value 2
+   - add 'activityType' to sales w/ value 1
+   - rearrange sales with 'ALTER TABLE table_name MODIFY COLUMN misplaced_column INT(11) AFTER other_column;'
+   - then 'REPLACE INTO activitys SELECT * FROM sales;'
+   - change collation of activitys to utf8_unicode_ci
+- separate stores into storenames (names/chains) and storeinstances (physical locations)
+   - drop the 'chains' table
+   - convert to utf8_unicode_ci
+   - name stores storenames, and copy it into a new table storeinstances
+   - rename storeinstances id to storename_id, then copy that column: UPDATE storeinstances SET id = storename_id
+   - storename fields become one word like 'phone' or 'twitter'
+   - delete duplicates in storenames, set storename_id of chained stores in storeinstances to be the same
+   - get rid of storeCity (add "isCity" field in locations to indicate a the location should be used in addresses)
+- rename xref tables and their columns, and add AUTO_INCREMENTing primary keys
+- change store_alsolike_xref to "similarstores"
