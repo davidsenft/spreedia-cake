@@ -35,18 +35,8 @@ class Location extends AppModel {
 		)
 	);
 	
-	/* Methods
-	
-	public function isTop(){
-		return !$this->data['Location']['parent'] ? true : false;
+	public function isActive(){
+		return $this->field('statusID')==1 ? true : false;
 	}
-	
-	public function getTop(){
-		if (!$this->isTop()){
-			return 'NOT TOP';
-			// return $this->getTop();
-		}
-		return $this->id;
-	} */
     
 }

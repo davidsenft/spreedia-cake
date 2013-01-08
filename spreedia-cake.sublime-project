@@ -2,9 +2,6 @@
 	"folders":
 	[
 		{
-			"path": "app/View/Layouts"
-		},
-		{
 			"path": "app/Model"
 		},
 		{
@@ -15,6 +12,9 @@
 		},
 		{
 			"path": "app/webroot"
+		},
+		{
+			"path": "app/View"
 		}
 	]
 }

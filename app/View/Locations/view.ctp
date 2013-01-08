@@ -1,11 +1,16 @@
-What's up guys!
+<!-- ******************************************************************** -->
+<!-- LOCATION -->
+<!-- ******************************************************************** -->
+<h1><?php echo $location['name']; ?></h1>
+<p>TOP: <?php echo $top; ?></p>
+<p>CITY: <?php echo $city; ?></p>
 
-My location is <?php echo $location['name']; ?>!<br><br>
+<!-- ******************************************************************** -->
+<!-- BREADCRUMBS -->
+<!-- ******************************************************************** -->
+<?php if ($parent) echo "My parent is ".$parent['name']."<br><br>"; ?>
 
-<?php if (isset($parent)) echo "My parent is ".$parent['name']."<br><br>"; ?>
 
-CITY: <?php echo $location['isCity'] ? "true" : "false"; ?><br><br>
 
-TOP: <?php echo $location['parent'] ? "false" : "true"; ?><br><br>
 
 STORES: <?php echo count($stores); ?>
