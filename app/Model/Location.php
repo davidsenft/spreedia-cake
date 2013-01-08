@@ -35,7 +35,7 @@ class Location extends AppModel {
 		)
 	);
 	
-	// Methods
+	/* Methods
 	
 	public function isTop(){
 		return !$this->data['Location']['parent'] ? true : false;
@@ -47,6 +47,6 @@ class Location extends AppModel {
 			// return $this->getTop();
 		}
 		return $this->id;
-	}
+	} */
     
 }

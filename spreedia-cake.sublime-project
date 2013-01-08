@@ -1,0 +1,20 @@
+{
+	"folders":
+	[
+		{
+			"path": "app/View/Layouts"
+		},
+		{
+			"path": "app/Model"
+		},
+		{
+			"path": "app/Controller"
+		},
+		{
+			"path": "app/Config"
+		},
+		{
+			"path": "app/webroot"
+		}
+	]
+}

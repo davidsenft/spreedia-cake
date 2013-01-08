@@ -16,7 +16,7 @@ class LocationsController extends AppController {
 	public function view($id){
 		// $this->layout = 'spreediaguide';
 		
-		// check validity
+		// check location validity
 		$this->Location->id = $id;
 		if (!$this->Location->exists()) {
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
@@ -34,23 +34,25 @@ class LocationsController extends AppController {
 			'Child.Child.Storeinstance'
 		));
 		
-		// get 
+		// location info
 		$loc = $this->Location->read(null, $id);
-	   	$this->set('location', $loc['Location']);
-	   	if ($loc['Location']['parent'])
-			$this->set('parent', $loc['Parent']);
+		$this->set('location', $loc['Location']);
+
+		// parent info
+		$parent = $loc['Location']['parent'] ? $loc['Parent'] : false;
+		$this->set('parent', $parent);
+
+		// store info
+		$stores = getStoresArrayRecursive($loc);
+		$this->set('stores', $stores);
 		
-		// testing isTop
-		// $test = $this->Location->getTop();
-		// debug($test);
-		debug($loc);
-			
-		// set the stores recursively
-		$stores = $loc['Storeinstance'];
-		$this->set('stores', $loc['Storeinstance']);
+		// debug($parent);
 	    		
 		// set metas and page header stuff
 		$this->set('title_for_layout', $loc['Location']['name'] . ' | Spreedia');
+
+		// testing isTop
+		// $test = $this->Location->isTop();
 		
 	}
 

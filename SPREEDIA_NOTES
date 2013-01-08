@@ -1,3 +1,11 @@
+TODO:
+
+- storeHours formatting ok? not so in debug.
+
+
+
+
+
 Database changes:
 
 - all ID fields to 'id' and 'xxx_id' except for status and parent
