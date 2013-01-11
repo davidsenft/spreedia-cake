@@ -12,14 +12,24 @@ class LocationsController extends AppController {
 
 	public $name = 'Locations';
 	// public $scaffold;
+
+	public $components = array('RequestHandler'); 
 	
 	public function view($id){
-		// $this->layout = 'spreediaguide';
-		
+		// $this->Api->allowPublic('add'); ????
+		$this->layout = 'spreediaguide';
+
 		// check that location exists
 		$this->Location->id = $id;
 		if (!$this->Location->exists() || !$this->Location->isActive())
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
+
+		/* get icon info
+		$Icon = ClassRegistry::init('Icon');
+		$icons = $Icon->find("all");
+		$icons2 = array();
+		foreach ($icons as $i){$icons2[$i['Icon']['id']] = $i['Icon'];}
+		$this->set('icons', $icons2); */
 		
 		// recursion/containment (allows only 3 nested locations)
 		$this->Location->recursive = 2;
@@ -29,34 +39,61 @@ class LocationsController extends AppController {
 			'Child',
 			'Child.Child',
 			'Storeinstance',
-			'Storeinstance.Storename',
+			// 'Storeinstance.Storename',
 			'Child.Storeinstance',
-			'Child.Storeinstance.Storename',
-			'Child.Child.Storeinstance',
-			'Child.Child.Storeinstance.Storename'
+			// 'Child.Storeinstance.Storename',
+			'Child.Child.Storeinstance'
+			// 'Child.Child.Storeinstance.Storename'
 		));
 		
 		// location info
 		$loc = $this->Location->read(null, $id);
-		$this->set('location', $loc['Location']);
+		list($city,$top) = getCityAndTop($loc); // TODO turn these into collections rather than just names?
+		$location = $loc['Location'];
+		$location['City'] = $city; 
+		$location['Top'] = $top;
+		$this->set('location', $location);
 
-		// city and top info
-		list($city,$top) = getCityAndTop($loc);
-		$this->set('city', $city);
-		$this->set('top', $top);
+		// children info
+		$child = $loc['Child'];
+		$childids = getChildrenRecursive($child);
+		// debug($childids);
 
 		// parent info
 		$parent = $loc['Location']['parent'] ? $loc['Parent'] : false;
 		$this->set('parent', $parent);
 
 		// store info
-		$stores = getStoresArrayRecursive($loc);
-		$this->set('stores', $stores);
-		
-		// debug($loc);
+		$Storename = ClassRegistry::init('Storename');
+		$storeinstances = getStoreInstancesRecursive($loc);
+		$storenameids = array();
+		foreach($storeinstances as $si){$storenameids[] = $si['storename_id'];}
+		$storenames = $Storename->find("all", array(
+			'conditions' => array('Storename.id' => $storenameids)
+		));
+
+		// indicate which store instances are local
+		$superstorenames = array();
+		foreach ($storenames as $sn){
+			$ssn = $sn;
+			$ssn['Localinstance'] = array();
+			foreach ($sn['Storeinstance'] as $si){
+				if ($si['location_id'] == $id || in_array($si['location_id'], $childids)){
+					$ssn['Localinstance'][] = $si;
+				}
+			}
+			$superstorenames[] = $ssn;
+		}
+		$this->set('stores', $storenames);
+
+		// debug(gettype($storenames));
+		// debug(gettype($superstorenames));
+		$this->set('stores', $superstorenames);
 	    		
 		// set metas and page header stuff
 		$this->set('title_for_layout', $loc['Location']['name'] . ' | Spreedia');
+
+		$this->set('_serialize', array('location', 'parent', 'stores'));
 		
 	}
 

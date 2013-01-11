@@ -1,0 +1,4 @@
+#Gzip
+<ifmodule mod_deflate.c>
+AddOutputFilterByType DEFLATE application/javascript
+</ifmodule>

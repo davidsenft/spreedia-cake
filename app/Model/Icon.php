@@ -10,9 +10,9 @@ class Icon extends AppModel {
 	public $name = "Icon";
 	
 	public $hasAndBelongsToMany = array(
-        'Storename' => array(
+        /* 'Storename' => array(
             'className'    => 'Storename'
-        ),
+        ), */
         /* 'Storeinstance' => array(
             'className'    => 'Storeinstance'
         ) */
