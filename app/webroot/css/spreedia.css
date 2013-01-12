@@ -1,6 +1,109 @@
+
+@font-face {
+    font-family: 'BebasRegular';
+    src: url('../fonts/BEBAS___-webfont.eot');
+    src: url('../fonts/BEBAS___-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/BEBAS___-webfont.woff') format('woff'),
+         url('../fonts/BEBAS___-webfont.ttf') format('truetype'),
+         url('../fonts/BEBAS___-webfont.svg#BebasRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+.bebas {font-family:'BebasRegular';}
+
+@font-face {
+    font-family: 'spreediaregular';
+    src: url('../fonts/spreediafont-v1.1-webfont.eot');
+    src: url('../fonts/spreediafont-v1.1-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/spreediafont-v1.1-webfont.woff') format('woff'),
+         url('../fonts/spreediafont-v1.1-webfont.ttf') format('truetype'),
+         url('../fonts/spreediafont-v1.1-webfont.svg#spreediaregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+.spreediaregular, .icon {font-family:'spreediaregular';font-size:2em;}
+
+body {
+    /* background-image:url('/images/bgnoise.png'); */
+}
+
 div.store {
 	border:1px solid black;
 	border-radius:10px;
-	padding:20px;
+	padding:10px 20px;
 	margin-bottom:20px;
 }
+
+h1 {
+    color:black;
+    position:fixed;
+    font-size:60px;
+    text-shadow: 4px 3px 0px #fff, 9px 8px 0px rgba(0,0,0,0.15);
+    z-index:100;
+}
+
+#verytop {
+    text-align:right;
+    position:fixed;
+    width:100%;
+    z-index:99;
+    background-color:white;
+    background-image:url('/images/bgnoise.png');
+    border-bottom:1px solid #e6e6e6;
+    -moz-box-shadow: 0 30px 30px 5px #fff;
+    -webkit-box-shadow: 0 30px 30px 5px #fff;
+    box-shadow: 0 30px 30px 5px #fff;
+}
+
+.green {color:#69a128;}
+.gray, .grey {color:#aaa;}
+.white {color:#fff;}
+.black {color:#000;}
+
+a {color: #69a128;}
+a:hover {color: #589720;}
+
+#verytop a {
+    display:inline-block;
+    padding:22px 22px 22px 0;
+}
+
+#topspacer {
+    height:30px;
+}
+
+button.icon {width:56px;}
+
+
+.tabs.vertical dd, .tabs.vertical li { border-left: 3px solid #cccccc; }
+.tabs.vertical dd a, .tabs.vertical li a { background: #f2f2f2; border: none; border: 1px solid #e6e6e6; border-width: 1px 1px 0 0; color: #555; display: block; font-size: 14px; height: auto; line-height: 1; padding: 15px 20px; -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
+.tabs.vertical dd.active, .tabs.vertical li.active { margin-top: 0; border-top: 1px solid #bbb; border-left: 4px solid #69a128; }
+.tabs.vertical dd.active a, .tabs.vertical li.active a { background: #fff; border: none; color: #000; height: auto; margin: 0; position: static; top: 0; -webkit-box-shadow: 0 0 0; -moz-box-shadow: 0 0 0; box-shadow: 0 0 0; }
+.tabs.vertical dd:first-child a.active, .tabs.vertical li:first-child a.active { margin: 0; }
+
+
+/* ---------------------- */
+/* COMPLEMENTARY */
+/* ---------------------- */
+
+[role="complementary"], [role="main"] { 
+    /* remove the default padding */
+    padding:0; 
+} 
+  
+@media all and (min-width: 768px) {  
+  
+  .js [role="complementary"] {  
+    /* Sets both the complementary and main sections at 100% width instead of main content / sidebar layout */
+    width: 100%; 
+}  
+  .js [role="main"] {  
+    width: 100%; padding: 0 0;  
+}  
+} /* end media query */
+  
+[role="main"]:before { 
+    content:""; 
+    /* Changes the bg color of the flyout panel */
+    background-color: #322820; 
+} 

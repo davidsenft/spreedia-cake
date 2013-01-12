@@ -6,14 +6,15 @@
 	<div class='store storename-{{this.Storename.id}}'>
 
 		<h2>{{this.Storename.name}}</h2>
-		<p>Price range: {{this.Pricerange.range}}</p>
-		<p>Icons: 
-			<span class='commas'>
+		
+		<p> 
+			<span>
 			{{#each this.Icon}}
-				<span>{{iconLongName}}</span>
+				{{#icon this}}{{/icon}}
 			{{/each}}
 			</span>
 		</p>
+		<p>Price range: {{this.Pricerange.range}}</p>
 
 	{{#if_gt this.Localinstance.length compare=1}}
 		<!-- MULTIPLE LOCAL INSTANCES -->

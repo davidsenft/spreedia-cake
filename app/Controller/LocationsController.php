@@ -14,22 +14,24 @@ class LocationsController extends AppController {
 	// public $scaffold;
 
 	public $components = array('RequestHandler'); 
+	// public $helpers = array('Icon');
 	
 	public function view($id){
 		// $this->Api->allowPublic('add'); ????
 		$this->layout = 'spreediaguide';
+
+		// $this->helpers[] = 'Icon';
 
 		// check that location exists
 		$this->Location->id = $id;
 		if (!$this->Location->exists() || !$this->Location->isActive())
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
 
-		/* get icon info
+		// get icon info
 		$Icon = ClassRegistry::init('Icon');
 		$icons = $Icon->find("all");
-		$icons2 = array();
-		foreach ($icons as $i){$icons2[$i['Icon']['id']] = $i['Icon'];}
-		$this->set('icons', $icons2); */
+		$this->set('icons', $icons);
+		// debug($icons);
 		
 		// recursion/containment (allows only 3 nested locations)
 		$this->Location->recursive = 2;
@@ -71,6 +73,7 @@ class LocationsController extends AppController {
 		$storenames = $Storename->find("all", array(
 			'conditions' => array('Storename.id' => $storenameids)
 		));
+		// debug($storenames);
 
 		// indicate which store instances are local
 		$superstorenames = array();
@@ -93,7 +96,7 @@ class LocationsController extends AppController {
 		// set metas and page header stuff
 		$this->set('title_for_layout', $loc['Location']['name'] . ' | Spreedia');
 
-		$this->set('_serialize', array('location', 'parent', 'stores'));
+		$this->set('_serialize', array('location', 'icons', 'stores'));
 		
 	}
 

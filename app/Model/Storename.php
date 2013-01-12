@@ -26,7 +26,8 @@ class Storename extends AppModel {
 	
 	public $hasAndBelongsToMany = array(
 		'Icon' => array(
-			'className'    => 'Icon'
+			'className'    => 'Icon',
+			'order'        => 'Icon.name ASC'
 		)
 	);
       

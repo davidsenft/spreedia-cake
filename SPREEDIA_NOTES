@@ -1,12 +1,14 @@
 TODO:
 
-- storeHours formatting ok? not so in debug.
+- storeHours formatting ok? only bad in debug?
+- AssetCompress plugin not yet enabled
+- Click on Search and load info for City/top via ajax
 
 
 
 
 
-Database changes:
+These changes were made to the database:
 
 - all ID fields to 'id' and 'xxx_id' except for status and parent
 - rename dollarKeys table to prices (and in other tables, price_id)
@@ -24,5 +26,8 @@ Database changes:
    - storename fields become one word like 'phone' or 'twitter'
    - delete duplicates in storenames, set storename_id of chained stores in storeinstances to be the same
    - get rid of storeCity (add "isCity" field in locations to indicate a the location should be used in addresses)
-- rename xref tables and their columns, and add AUTO_INCREMENTing primary keys
-- change store_alsolike_xref to "similarstores"
+- rename xref tables and their columns, and add AUTO_INCREMENTing primary keys(?)
+- change store_alsolike_xref to a HABTM-through "similarstores" model
+
+Stores that have changed:
+ - Artifaktori Davis
