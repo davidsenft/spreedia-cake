@@ -4,11 +4,20 @@
 
 <?php /* if ($parent) echo "My parent is ".$parent['name']."<br><br>"; */ ?>
 
-<div id="verytop" class='bebas'>
-	<a href='/'>Spreedia</a>
-	<a href='/favorites'>Favorites</a>
-	<a href='/magazine'>Magazine</a>
+
+<div id="verytop" >
+	<span class='green symbol'>d</span>
 </div>
+
+<nav>
+	<ul class='right bebas hide-for-small'>
+		<!--<li><a href='/me'>davidsenft</a></li>-->
+		<li><a href='/explore'><u>Explore</u></a></li>
+		<li><a href='/magazine'>Magazine</a></li>
+		<li><a href='/favorites'>Favorites</a></li>
+		<li><a href='/recs'>Personalize</a></li>
+	</ul>
+</nav>
 
 <div class="row">
 	<div class="twelve columns">
@@ -21,15 +30,14 @@
 
 <div class="row">
 	<div class="four columns">
-		<dl class="vertical tabs">
+		<dl class="vertical tabs" style='margin-bottom:0;'>
 			<dd class="active"><a href="#simple1">List</a></dd>
 			<dd><a href="#simple2">Map</a></dd>
 			<dd><a href="#simple3">Activity</a></dd>
 		</dl>
-		<div id='hb_panel' class='panel'></div>
+		<div id='hb_panel' class='panel' style='border-top:0;'></div>
 	</div>
 	<div class="eight columns">
-
 		<div id='hb_storelist'></div>
 	</div>
 	<hr>

@@ -13,15 +13,15 @@
 
 @font-face {
     font-family: 'spreediaregular';
-    src: url('../fonts/spreediafont-v1.1-webfont.eot');
-    src: url('../fonts/spreediafont-v1.1-webfont.eot?#iefix') format('embedded-opentype'),
-         url('../fonts/spreediafont-v1.1-webfont.woff') format('woff'),
-         url('../fonts/spreediafont-v1.1-webfont.ttf') format('truetype'),
-         url('../fonts/spreediafont-v1.1-webfont.svg#spreediaregular') format('svg');
+    src: url('../fonts/spreediafont-v1.2-webfont.eot');
+    src: url('../fonts/spreediafont-v1.2-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/spreediafont-v1.2-webfont.woff') format('woff'),
+         url('../fonts/spreediafont-v1.2-webfont.ttf') format('truetype'),
+         url('../fonts/spreediafont-v1.2-webfont.svg#spreediaregular') format('svg');
     font-weight: normal;
     font-style: normal;
 }
-.spreediaregular, .icon {font-family:'spreediaregular';font-size:2em;}
+.spreediaregular, .icon, .symbol {font-family:'spreediaregular';font-size:2em;}
 
 body {
     /* background-image:url('/images/bgnoise.png'); */
@@ -42,11 +42,12 @@ h1 {
     z-index:100;
 }
 
+#verytop, nav {width:100%; position:fixed;}
+
 #verytop {
+    height:60px;
     text-align:right;
-    position:fixed;
-    width:100%;
-    z-index:99;
+    z-index:98;
     background-color:white;
     background-image:url('/images/bgnoise.png');
     border-bottom:1px solid #e6e6e6;
@@ -54,6 +55,8 @@ h1 {
     -webkit-box-shadow: 0 30px 30px 5px #fff;
     box-shadow: 0 30px 30px 5px #fff;
 }
+
+nav {z-index:99;}
 
 .green {color:#69a128;}
 .gray, .grey {color:#aaa;}
@@ -63,13 +66,11 @@ h1 {
 a {color: #69a128;}
 a:hover {color: #589720;}
 
-#verytop a {
-    display:inline-block;
-    padding:22px 22px 22px 0;
-}
+nav li { float:left; list-style:none; padding:22px 22px 22px 0; }
+#verytop span.symbol { display:inline-block; padding:12px 22px 0 0; font-size:3em;}
 
 #topspacer {
-    height:30px;
+    height:60px;
 }
 
 button.icon {width:56px;}
@@ -91,7 +92,10 @@ button.icon {width:56px;}
     padding:0; 
 } 
   
-@media all and (min-width: 768px) {  
+@media all and (min-width: 768px) {
+
+    #verytop ul#nav { display:inline-block; }
+    #verytop span.symbol { display:none;}
   
   .js [role="complementary"] {  
     /* Sets both the complementary and main sections at 100% width instead of main content / sidebar layout */
