@@ -1,0 +1,59 @@
+{{#each stores}}
+	
+	<div class='store inherit-match pricematch' data-storename='{{this.Storename.id}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
+
+		<!-- /* THUMBNAIL IMAGE */ -->
+
+		<div class='storethumb left'>
+			{{#img120 this.Image.0.name}}{{/img120}}
+		</div>
+
+		<!-- /* STORE INFORMATION */ -->
+
+		<div class='storeinfo right scale-text'>
+
+			<!-- /* HEART */ -->
+
+			<span class='right symbol hover gray-to-red' title='Add {{this.Storename.name}} to my favorite stores'>f</span>
+
+			<!-- /* STORE TITLE AND COUNT */ -->
+
+			<h2>{{this.Storename.name}}
+			{{#if_gt this.Localinstance.length compare=1}}
+				({{this.Localinstance.length}} locations)
+			{{/if_gt}}
+			</h2>
+
+			<!-- /* ICONS AND CHAIN-WIDE INFO */ -->
+			
+			<p> 
+				<span class='pricerange'>
+					{{this.Pricerange.range}} 
+				</span>
+				<span>
+				{{#each this.Icon}}
+					{{#icon this}}{{/icon}}
+				{{/each}}
+				</span>
+				<span class='matchtext'></span>
+			</p>
+
+			<!-- /* LOCATION INFO */ -->
+
+			<div class='storelocations expandable-for-verysmall'>
+
+			{{#each this.Localinstance}}
+				<div class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
+					<h3>{{this.locationName}}</h3>
+					<p>Address: {{this.storeAddress1}}<br>{{this.storeAddress2}}</p>
+					<p>Store hours: {{this.storeHours}}</p>
+					<p class='distance'></p>
+				</div>
+			{{/each}}
+
+			</div><!-- .storelocations -->
+		</div><!-- .storeinfo -->
+	</div><!-- .store -->
+{{/each}}
+
+<div id='nomatches'>Sorry, there are no matches for your selections.</div>

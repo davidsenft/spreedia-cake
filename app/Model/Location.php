@@ -38,5 +38,7 @@ class Location extends AppModel {
 	public function isActive(){
 		return $this->field('statusID')==1 ? true : false;
 	}
+
+	// TODO: hasAndBelongsToMany Activity?
     
 }

@@ -39,6 +39,9 @@ class AppController extends Controller {
 	* @var array
 	*/
 	public $components = array(
+
+		/* Automatically Detect AJAX requests (JSON or XML) */
+		'RequestHandler'
 	
 		/* Enable Sessions
 		'Session', */

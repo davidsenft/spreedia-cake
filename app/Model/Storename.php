@@ -1,6 +1,10 @@
 <?php
 /**
- * Store model for Spreedia.
+ * Storename Model (e.g. represents "Crush Boutique" or "Gap")
+ * A Storename may have any number of store instances
+ * The following store attributes are assigned to the Storename:
+ *  - Price range
+ *  - Icons
  */
 
 App::uses('AppModel', 'Model');
@@ -21,6 +25,15 @@ class Storename extends AppModel {
 			'className'    => 'Storeinstance',
 			'conditions'   => array('Storeinstance.statusID' => '1'),
 			'dependent'    => true
+		),
+		'Image' => array(
+			'className'    => 'Image',
+			'conditions'   => array('Image.statusID' => '1'),
+			'dependent'    => true
+		),
+		'Activestorename' => array(
+			'className'    => 'Activestorename',
+			'dependent'    => true
 		)
 	);
 	
@@ -28,6 +41,14 @@ class Storename extends AppModel {
 		'Icon' => array(
 			'className'    => 'Icon',
 			'order'        => 'Icon.name ASC'
+		),
+		'Activity' => array(
+			'className'    => 'Activity',
+			'joinTable'    => 'activities_storenames',
+			'associationForeignKey'   => 'storename_id' // ,
+			/* 'conditions'   => array(
+				'Activity.statusID' => '1',
+			) */
 		)
 	);
       

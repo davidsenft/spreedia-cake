@@ -1,8 +1,8 @@
 <?php
 /**
- * Location controller.
+ * User controller.
  *
- * This file will render views from views/locations/
+ * This file will render views from views/users/
  *
  */
 
@@ -10,7 +10,8 @@ App::uses('AppController', 'Controller');
 
 class UsersController extends AppController {
 
-    var $name = 'Users';
+    public $name = 'Users';
+
     // var $components = array('Auth'); // Not necessary if declared in your app controller
 
     /**

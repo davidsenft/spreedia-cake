@@ -1,8 +1,8 @@
 <?php
 /**
- * Location controller.
+ * Icon controller.
  *
- * This file will render views from views/locations/
+ * This file will render views from views/icons/
  *
  */
 

@@ -1,12 +1,26 @@
+/* ******************************************************************** */
+/* Spreedia Handlebars Helpers */
+/* ******************************************************************** */
+
 /**
- * Icon helper
- * #icon TKTKTK
+ * Spreedia Image helpers
  */
-Handlebars.registerHelper('icon', function(context) {
-	return "<span class='green icon' title='" + context.iconLongName + "'>" + context.char + "</span>";
+Handlebars.registerHelper('img120', function(context) {
+	return "<img class='thumb' src='/images/storeimages/120/" + context.replace('.jpg','_120.jpg') + "'>";
 });
 
+/**
+ * Spreedia Icon helper
+ */
+Handlebars.registerHelper('icon', function(context) {
+	// alert(Handlebars.icons[0]);
+	return "<span class='green icon match' data-icon='" + context.id + "' title='" + context.name.replace(/'/g, "&#39;") + "'>" + context.char + "</span>";
+
+});
+
+/* ******************************************************************** */
 /* Comparison Handlebars Helpers by Dan Harper (http://github.com/danharper) */
+/* ******************************************************************** */
 
 /**
  * If Equals
@@ -28,7 +42,6 @@ Handlebars.registerHelper('unless_eq', function(context, options) {
 	return options.fn(this);
 });
 
-
 /**
  * If Greater Than
  * if_gt this compare=that
@@ -48,7 +61,6 @@ Handlebars.registerHelper('unless_gt', function(context, options) {
 		return options.inverse(this);
 	return options.fn(this);
 });
-
 
 /**
  * If Less Than

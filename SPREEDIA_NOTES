@@ -3,6 +3,7 @@ TODO:
 - storeHours formatting ok? only bad in debug?
 - AssetCompress plugin not yet enabled
 - Click on Search and load info for City/top via ajax
+- Orbit?
 
 
 
@@ -15,7 +16,7 @@ These changes were made to the database:
 - merge sales and events into activity
    - rename events to activitys, add 'activityType' w/ value 2
    - add 'activityType' to sales w/ value 1
-   - rearrange sales with 'ALTER TABLE table_name MODIFY COLUMN misplaced_column INT(11) AFTER other_column;'
+   - rearrange columns
    - then 'REPLACE INTO activitys SELECT * FROM sales;'
    - change collation of activitys to utf8_unicode_ci
 - separate stores into storenames (names/chains) and storeinstances (physical locations)
@@ -28,6 +29,27 @@ These changes were made to the database:
    - get rid of storeCity (add "isCity" field in locations to indicate a the location should be used in addresses)
 - rename xref tables and their columns, and add AUTO_INCREMENTing primary keys(?)
 - change store_alsolike_xref to a HABTM-through "similarstores" model
+- store_images_xref goes to images and images_storeinstances
+   - get rid of duplicates in images for stores with only one set of images 
+     (artifaktori, black ink, marathon sports, second time around)
+   - keep duplicates in images for crush boutique and tannery, but add to images_storeinstances
 
 Stores that have changed:
  - Artifaktori Davis
+
+
+
+
+
+
+
+ CSS CLASS FUNCTIONALITY
+
+
+
+ .click gets .clicked
+ .hover gets .over
+ .format gets .active if data-activate matches body's data-format
+ .match gets .matching if data-icon matches a button.icon with same data-id
+
+

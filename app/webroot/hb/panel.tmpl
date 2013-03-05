@@ -1,0 +1,35 @@
+<div id='sortbypanel'>
+	Sort by: &nbsp;
+	<select id='sortby'>
+		<option value='icon'>Best match</option>
+		<option value='random'>Random</option>
+		<option value='location' disabled='disabled'>Distance</option>
+		<option value='price-hi-low'>$$$$ -> $</option>
+		<option value='price-low-hi'>$ -> $$$$</option>
+		<option value='alphabetical'>A -> Z</option>
+	</select>
+</div>
+
+<!-- {{#each prices}}
+	{{#with Price}}
+		<button data-id='{{this.id}}' class='price hover click clicked'>{{this.name}}</button>
+	{{/with}}
+{{/each}} -->
+
+<div id='pricerangepanel'>
+	<div id='amount'></div>
+	<div id='slider-pricerange'></div>
+	<div id='steps'>
+        <span class="tick">|<br><span class='pricemarker'>$</span></span>
+        <span class="tick" style="left: 33.3%;">|<br><span class='pricemarker'>$$</span></span>
+        <span class="tick" style="left: 66.7%;">|<br><span class='pricemarker'>$$$</span></span>
+        <span class="tick" style="left: 100%;">|<br><span class='pricemarker'>$$$$</span></span>
+    </div>
+</div>
+
+{{#each icons}}
+	{{#with Icon}}
+		<button data-id='{{this.id}}' class='icon hover click'>{{this.char}}</button>
+	{{/with}}
+{{/each}}
+

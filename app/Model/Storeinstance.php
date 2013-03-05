@@ -8,8 +8,8 @@ App::uses('AppModel', 'Model');
 class Storeinstance extends AppModel {
 	
 	public $name = "Storeinstance";
-	public $cacheQueries = false; //
-	
+	public $cacheQueries = false;
+
 	public $belongsTo = array(
 		'Storename' => array(
 			'className'    => 'Storename'
@@ -23,6 +23,10 @@ class Storeinstance extends AppModel {
 		'Similarstore' => array(
 			'className'    => 'Similarstore',
 			'dependent'    => true
+		),
+		'Activestoreinstance' => array(
+			'className'    => 'Activestoreinstance',
+			'dependent'    => true
 		)
 	);
     
@@ -35,6 +39,14 @@ class Storeinstance extends AppModel {
 				'Post.post_type' => 'post', 
 				'Post.post_status' => 'publish'
 			)
+		),
+		'Activity' => array(
+			'className'    => 'Activity',
+			'joinTable'    => 'activities_storeinstances',
+			'associationForeignKey'   => 'storeinstance_id' // ,
+			/* 'conditions'   => array(
+				'Activity.statusID' => '1',
+			) */
 		)
 	);
       
