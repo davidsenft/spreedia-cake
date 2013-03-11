@@ -12,6 +12,7 @@ class StoreinstancesController extends AppController {
 
 	public $name = 'Storeinstances';
 	public $scaffold;
+	public $cacheAction = true;
 
 	public function view($id, $format = 'list'){
 		$this->layout = 'basic';
@@ -24,15 +25,20 @@ class StoreinstancesController extends AppController {
 		list($city,$top) = getCityAndTop($store['Location']);
 		$store['Location']['City'] = $city; 
 		$store['Location']['Top'] = $top;
-		debug($store);
+		$this->set('store', $store);
+		// debug($store);
 
 		// set metas and page header stuff
 		$page = array(
+			'type' => "singlestore", // not using this yet
 			'title' => $store['Storename']['name'].' ('.$store['Location']['name'].')',
 			'seotitle' => $store['Storename']['name'].' ('.$store['Location']['name'].') | Spreedia',
 			'format' => $format
 		);
 		$this->set('page', $page);
+
+		// serialize for json/ajax
+		$this->set('_serialize', array('store','page'));
 
 	}
 
