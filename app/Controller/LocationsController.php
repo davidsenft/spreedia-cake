@@ -126,12 +126,14 @@ class LocationsController extends AppController {
 	
 		// set metas and page header stuff
 		$page = array(
+			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove?
 			'title' => $loc['Location']['name'],
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format
 		);
 		$this->set('page', $page);
 
+		// serialize for json/ajax
 		$this->set('_serialize', array('location', 'children', 'icons', 'stores', 'prices', 'page'));
 		
 	}

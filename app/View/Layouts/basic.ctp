@@ -30,7 +30,7 @@ echo $this->Html->css('spreedia');
 </script>
 
 </head>
-<body class='<?php echo $page['format']; ?>' data-format='<?php echo $page['format']; ?>'>
+<body class='<?php echo $page['type']; ?> <?php echo $page['format']; ?>' data-format='<?php echo $page['format']; ?>'>
 
 <!-- ******************************************************************** -->
 <!-- CONTENT -->

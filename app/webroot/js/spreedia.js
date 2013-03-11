@@ -25,7 +25,7 @@ function haversine(lat1,lng1,lat2,lng2){
 }
 
 
-(function( Spreedia, $, undefined ) {
+;(function( Spreedia, $, undefined ) {
 
 	// store geolocation permissions (so firefox doesn't keep asking)
 	Spreedia.askedPermission = false;
@@ -37,6 +37,75 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.units = new Array("miles", "feet");
 	Spreedia.metricfactors = new Array(1, 1000);
 	Spreedia.metricunits = new Array("km", "m");
+
+	// runs on page load, once templates have been loaded
+	Spreedia.init = function(){
+		console.log("initializing listeners...");
+		// TODO: move these event listeners to another function that can be called after ajax loads?
+
+		// activate (add .active class) according to page format
+		$(".format").filter("[data-activate='" + $("body").data("format") + "']").addClass("active");
+
+		// anything with .click class
+		$(".click").click(function(){
+			$(this).toggleClass("clicked");
+			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
+			// else if ($(this).is("button.price")) Spreedia.updatePrice($(this).attr("data-id"));
+		});
+
+		// anything with .hover class gets .over class on hover
+		$(".hover").hover(function(){
+			$(this).addClass("over");
+		},function(){
+			$(this).removeClass("over");
+		});
+
+	}
+
+	// additional init stuff for stores pages (e.g. list, map, search results)
+	Spreedia.stores_init = function(){
+		console.log("initializing list/map stuff...");
+
+		// pricerange slider
+		var range = $("#slider-pricerange");
+		function slidefunc(event, ui){Spreedia.updatePrice(ui.values[0], ui.values[1]);}
+		range.slider({range: true, min: 1, max: 4, values: [ 1, 4 ], slide: slidefunc});
+		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
+
+		// user location
+		Spreedia.updateDistances();
+
+		// "list" format pages only
+		if ($("body").attr("data-format") == "list"){
+
+			// sorting
+			$("#sortby").change(function(){
+				Spreedia.sortStores();
+			});
+
+			// white gradient at the top
+			$(window).scroll(function () {
+				var offset = Spreedia.getScrollOffset();
+				if (offset > 0){
+					$("body").addClass("offset");
+				}else{
+					$("body").removeClass("offset");
+				}
+			});
+		}
+
+		// "map" format pages only
+		if ($("body").attr("data-format") == "map"){
+			Spreedia.initializeMap(stores);
+		}
+
+	}
+
+	Spreedia.handle = function(name, context){
+		var template = Handlebars.compile($("#" + name + "-template").html());
+		var html = template(context);
+		$("#hb_" + name).html(html);
+	}
 
 	Spreedia.humanReadableDistance = function(d_km){
 		var d_factors = Spreedia.metric ? Spreedia.metricfactors : Spreedia.factors;
@@ -130,6 +199,26 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		console.log("// end setDistancesFromPos");
 	}
+
+	Spreedia.getScrollOffset = function(){
+	    // var x = 0, y = 0;
+	    var y = 0;
+	    if( typeof( window.pageYOffset ) == 'number' ) {
+	        // Netscape
+	        // x = window.pageXOffset;
+	        y = window.pageYOffset;
+	    } else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) {
+	        // DOM
+	        // x = document.body.scrollLeft;
+	        y = document.body.scrollTop;
+	    } else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) {
+	        // IE6 standards compliant mode
+	        // x = document.documentElement.scrollLeft;
+	        y = document.documentElement.scrollTop;
+	    }
+	    // return [x, y];
+	    return y;
+	}	
 
 	// returns true/false to indicate if position is supported
 	Spreedia.updateDistances = function(){
