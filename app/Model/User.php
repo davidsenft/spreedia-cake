@@ -11,11 +11,26 @@ class User extends AppModel {
 	public $cacheQueries = false;
 	public $scaffold;
 
+	public $validate = array(
+        'username' => array(
+            'required' => array(
+                'rule' => array('notEmpty'),
+                'message' => 'A username is required'
+            )
+        ),
+        'password' => array(
+            'required' => array(
+                'rule' => array('notEmpty'),
+                'message' => 'A password is required'
+            )
+        )
+    );
+
 	public function beforeSave($options = array()) {
-	    parent::beforeSave($options);
-	    if (!empty($this->data['User']['pwd-unhashed'])) {
+	    // parent::beforeSave($options);
+	    if (!empty($this->data[$this->alias]['pwd-unhashed'])) {
 	    	// hash the password
-	        $this->data['User']['password'] = AuthComponent::password($this->data['User']['pwd-unhashed']);
+	        $this->data[$this->alias]['password'] = AuthComponent::password($this->data[$this->alias]['pwd-unhashed']);
 	    }
 	    return true;
 	}

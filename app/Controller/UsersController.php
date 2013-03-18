@@ -12,39 +12,60 @@ class UsersController extends AppController {
     var $name = 'Users';
     var $helpers = array('Html', 'Form');
   
-    function beforeFilter() {
-        // parent::beforeFilter();
+    public function beforeFilter() {
+        parent::beforeFilter();
         $this->Auth->allow('register');
     }
 
-    function isAuthorized() {
+    public function isAuthorized() {
         return true;
     }
       
-    function register() {
+    public function register() {
         
-        if (!empty($this->data)) {
-
-            debug($this->data);
+        if ($this->request->is('post') && !empty($this->data)) {
+            // debug($this->data);
             $this->User->create();
-            if ($this->User->save($this->data)){
-                debug($this->Auth->login($this->data));
+            if ($this->User->save($this->request->data)){
+                $this->Session->setFlash(__('The user has been saved'));
                 // $this->redirect(array('action' => 'index'));
-
+            }else{
+                $this->Session->setFlash(__('There was an error while attempting to register'));
             }
+                // debug($this->Auth->login($this->data));
+                // $this->redirect(array('action' => 'index'));
+            // }
 
         }
     }
 
-    function login(){
+    public function login(){
+        if ($this->request->is('post')) {
+            if ($this->Auth->login()) {
+                $this->Session->setFlash(__('You have been logged in!'));
+            } else {
+                $this->Session->setFlash(__('Invalid username or password, try again'));
+            }
+        }else{
+            $this->Session->setFlash(__('Nothing has been posted...')); // TODO: remove?
+        }
     }
 
-    function logout(){
+    public function logout(){
         $this->redirect($this->Auth->logout());
     }
 
-    function index(){
-        
+    public function index(){
+        $this->User->recursive = 0;
+        $this->set('users', $this->paginate());
+    }
+
+    public function view($id = null) {
+        $this->User->id = $id;
+        if (!$this->User->exists()) {
+            throw new NotFoundException(__('Invalid user'));
+        }
+        $this->set('user', $this->User->read(null, $id));
     }
 
 
