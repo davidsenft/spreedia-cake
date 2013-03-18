@@ -73,7 +73,7 @@ $(document).ready(function(){
 		echo "\"".$obj_name."\":".json_encode(${$obj_name}).",";
 	} ?>}
 
-	$.getJSON(".json", {}, function(result){
+	$.getJSON("<?php echo $_SERVER['REQUEST_URI']; ?>.json", {}, function(result){
 
 		console.log("loading templates...");
 		Spreedia.handle("location", result["location"]);
