@@ -10,6 +10,10 @@ class Storeinstance extends AppModel {
 	public $name = "Storeinstance";
 	public $cacheQueries = false;
 
+	public function isAuthorized() {
+        return true;
+    }
+
 	public $belongsTo = array(
 		'Storename' => array(
 			'className'    => 'Storename'

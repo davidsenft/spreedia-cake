@@ -16,6 +16,10 @@ class LocationsController extends AppController {
 	var $helpers = array('Cache', 'Handlebars');
 	var $cacheAction = "10 seconds";
 
+	public function isAuthorized() {
+        return true;
+    }
+
 	/* public function index(){
 		// $this->layout = 'basic';
 	} */
