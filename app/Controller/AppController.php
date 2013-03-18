@@ -41,12 +41,12 @@ class AppController extends Controller {
 	public $components = array(
 
 		/* Automatically Detect AJAX requests (JSON or XML) */
-		'RequestHandler'
+		'RequestHandler',
 	
-		/* Enable Sessions
-		'Session', */
+		/* Enable Sessions */
+		'Session',
 	
-		/* Enable authentication
+		/* Enable authentication */
 		'Auth' => array(
 			'authorize' => array(
 				'Controller'
@@ -58,7 +58,7 @@ class AppController extends Controller {
 				// Allow authentication by access token
 				'Api.Token',
 			)
-		),
+		), 
 		
 		// Enable REST API Plugin
 		'Api.Api',
@@ -66,7 +66,7 @@ class AppController extends Controller {
 		// Enable CRUD actions
 		'Crud.Crud' => array(
 			'actions' => array('index', 'add', 'edit', 'view', 'delete')
-		) */
+		)
 		
 	);
 
@@ -117,4 +117,5 @@ class AppController extends Controller {
 			throw $e;
 		}
 	}
+
 }

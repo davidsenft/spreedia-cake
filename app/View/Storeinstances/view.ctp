@@ -3,7 +3,7 @@
 
 <div id='wrapper' class='center'>
 
-	<h1>HI THE FUCK THERE</h1>
+	<h1>HI THERE, WORLD</h1>
 
 </div>
 
