@@ -102,9 +102,18 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	Spreedia.handle = function(name, context){
+		console.log("loading " + name + " template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
 		var html = template(context);
 		$("#hb_" + name).html(html);
+	}
+
+	Spreedia.loadLocation = function(result){
+		console.log("loading all location page templates...");
+		Spreedia.handle("location", result["location"]);
+		Spreedia.handle("storelist", {"stores" : result["stores"]});
+		Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
+		// Spreedia.handle("top", {"page" : result["page"]});
 	}
 
 	Spreedia.humanReadableDistance = function(d_km){

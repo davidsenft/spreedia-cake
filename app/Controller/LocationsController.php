@@ -28,11 +28,10 @@ class LocationsController extends AppController {
 	
 	public function view($id, $format = 'list'){
 
-		// check that location exists
+		// load location if it exists
 		$this->Location->id = $id;
 		if (!$this->Location->exists() || !$this->Location->isActive())
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
-
 		$loc = $this->getContained($id);
 
 		// set metas and page header stuff
@@ -46,14 +45,21 @@ class LocationsController extends AppController {
 
 		// format as list, map, or external js
 		if ($format == 'js'){
+			// initial external js data load (cached)
 			$this->RequestHandler->renderAs($this, 'js');
-			$this->viewish($loc, $format); // TODO: pass either id or loc, not both (redundant!)
+			$this->viewish($loc, $format);
+
+		}else if ($this->RequestHandler->responseType() == 'json'){
+			// subsequent ajax json requests (not cached)
+			$this->viewish($loc, $format);
+
 		}else{
 			$this->layout = 'basic';
 		}
 	}
 
 	public function getContained($id){
+		// TODO: move this to Location model?
 		// recursion/containment (allows only 3 nested locations)
 		$this->Location->recursive = 2;
 		$this->Location->contain(array(

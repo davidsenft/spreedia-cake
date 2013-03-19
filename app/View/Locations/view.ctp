@@ -41,7 +41,6 @@ $this->Handlebars->template('location');
 $this->Handlebars->template('storelist');
 $this->Handlebars->template('panel'); ?>
 
-
 <!-- ******************************************************************** -->
 <!-- EXTERNAL SCRIPTS -->
 <!-- SOME OF THIS SHIT SHOULD NOT NEED TO BE REPEATED... -->
@@ -63,7 +62,8 @@ $this->Handlebars->template('panel'); ?>
 <!-- INITIAL DATA LOAD (cached) -->
 <!-- ******************************************************************** -->
 
-<script type="text/javascript" src="<?php echo $_SERVER['REQUEST_URI']; ?>/js"></script>
+<?php $requri=$_SERVER['REQUEST_URI'];$jsurl=(substr($requri,-1)=='/')?$requri.'js':$requri.'/js'; ?>
+<script type="text/javascript" src="<?php echo $jsurl; ?>"></script>
 
 <!-- ******************************************************************** -->
 <!-- ON DOCUMENT READY -->
@@ -73,12 +73,7 @@ $this->Handlebars->template('panel'); ?>
 
 $(document).ready(function(){
 
-	console.log("loading templates...");
-	Spreedia.handle("location", result["location"]);
-	Spreedia.handle("storelist", {"stores" : result["stores"]});
-	Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
-	// Spreedia.handle("top", {"page" : result["page"]});
-
+	Spreedia.loadLocation(result); // from initial data load
 	Spreedia.init();
 	Spreedia.stores_init();
 
