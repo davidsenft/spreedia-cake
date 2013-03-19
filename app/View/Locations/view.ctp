@@ -60,17 +60,19 @@ $this->Handlebars->template('panel'); ?>
 <?php } ?>
 
 <!-- ******************************************************************** -->
-<!-- ON DOCUMENT READY -->
+<!-- INITIAL DATA LOAD (cached) -->
 <!-- ******************************************************************** -->
 
 <script type="text/javascript" src="<?php echo $_SERVER['REQUEST_URI']; ?>/js"></script>
+
+<!-- ******************************************************************** -->
+<!-- ON DOCUMENT READY -->
+<!-- ******************************************************************** -->
+
 <script type="text/javascript">
 
 $(document).ready(function(){
 
-	/* experiment */
-
-	var result = myjson;
 	console.log("loading templates...");
 	Spreedia.handle("location", result["location"]);
 	Spreedia.handle("storelist", {"stores" : result["stores"]});
