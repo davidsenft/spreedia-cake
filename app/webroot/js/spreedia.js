@@ -109,11 +109,16 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	Spreedia.loadLocation = function(result){
+		// load templates
 		console.log("loading all location page templates...");
 		Spreedia.handle("location", result["location"]);
 		Spreedia.handle("storelist", {"stores" : result["stores"]});
 		Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
 		// Spreedia.handle("top", {"page" : result["page"]});
+
+		// once templates are loaded
+		Spreedia.init();
+		Spreedia.stores_init();
 	}
 
 	Spreedia.humanReadableDistance = function(d_km){

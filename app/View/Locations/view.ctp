@@ -72,11 +72,7 @@ $this->Handlebars->template('panel'); ?>
 <script type="text/javascript">
 
 $(document).ready(function(){
-
-	Spreedia.loadLocation(result); // from initial data load
-	Spreedia.init();
-	Spreedia.stores_init();
-
+	Spreedia.loadLocation(result); // from initial data load (external js)
 });
 
 </script>
