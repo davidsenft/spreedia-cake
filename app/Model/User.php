@@ -9,7 +9,6 @@ class User extends AppModel {
 	
 	public $name = "User";
 	public $cacheQueries = false;
-	public $scaffold;
 
 	public $validate = array(
         'username' => array(

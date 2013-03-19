@@ -1,5 +1,5 @@
 <?php
-debug($this->Session);
+// debug($this->Session);
 echo $this->Session->flash();
 echo $this->Session->flash('auth');
 $form = $this->Form;

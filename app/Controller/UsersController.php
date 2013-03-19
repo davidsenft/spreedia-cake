@@ -11,6 +11,7 @@ App::uses('AppController', 'Controller');
 class UsersController extends AppController {
     var $name = 'Users';
     var $helpers = array('Html', 'Form');
+    public $scaffold;
   
     public function beforeFilter() {
         parent::beforeFilter();
@@ -46,8 +47,6 @@ class UsersController extends AppController {
             } else {
                 $this->Session->setFlash(__('Invalid username or password, try again'));
             }
-        }else{
-            $this->Session->setFlash(__('Nothing has been posted...')); // TODO: remove?
         }
     }
 
@@ -55,10 +54,10 @@ class UsersController extends AppController {
         $this->redirect($this->Auth->logout());
     }
 
-    public function index(){
+    /* public function index(){
         $this->User->recursive = 0;
         $this->set('users', $this->paginate());
-    }
+    } */
 
     public function view($id = null) {
         $this->User->id = $id;
