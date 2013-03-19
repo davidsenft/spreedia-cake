@@ -1,4 +1,3 @@
-
 <div id='hb_top' class='alignright'></div>
 
 <div id='wrapper' class='center'>
@@ -64,27 +63,22 @@ $this->Handlebars->template('panel'); ?>
 <!-- ON DOCUMENT READY -->
 <!-- ******************************************************************** -->
 
+<script type="text/javascript" src="<?php echo $_SERVER['REQUEST_URI']; ?>/js"></script>
 <script type="text/javascript">
 
 $(document).ready(function(){
 
-	// serialized json data ??
-	var myjson = {<?php foreach($_serialize as $obj_name){
-		echo "\"".$obj_name."\":".json_encode(${$obj_name}).",";
-	} ?>}
+	/* experiment */
 
-	$.getJSON("<?php echo $_SERVER['REQUEST_URI']; ?>.json", {}, function(result){
+	var result = myjson;
+	console.log("loading templates...");
+	Spreedia.handle("location", result["location"]);
+	Spreedia.handle("storelist", {"stores" : result["stores"]});
+	Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
+	// Spreedia.handle("top", {"page" : result["page"]});
 
-		console.log("loading templates...");
-		Spreedia.handle("location", result["location"]);
-		Spreedia.handle("storelist", {"stores" : result["stores"]});
-		Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
-		Spreedia.handle("top", {"page" : result["page"]});
-
-		Spreedia.init();
-		Spreedia.stores_init();
-
-	});
+	Spreedia.init();
+	Spreedia.stores_init();
 
 });
 

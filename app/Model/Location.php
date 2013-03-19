@@ -40,5 +40,20 @@ class Location extends AppModel {
 	}
 
 	// TODO: hasAndBelongsToMany Activity?
+
+	// Return location with virtual fields City and Top determined recursively
+	public function extendLocation($loc){
+		// TODO turn these into collections rather than just names?
+		list($city,$top) = getCityAndTop($loc); // in bootstrap.php
+		$location = $loc['Location'];
+		$location['City'] = $city; 
+		$location['Top'] = $top;
+		return $location;
+	}
+
+	// Return children and children's children, etc., determined recursively
+	public function recursiveChildren($child){
+		return getChildrenRecursive($child); // in bootstrap.php
+	}
     
 }
