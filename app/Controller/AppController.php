@@ -61,12 +61,12 @@ class AppController extends Controller {
 		), 
 		
 		// Enable REST API Plugin
-		'Api.Api',
+		/* 'Api.Api',
 		
 		// Enable CRUD actions
 		'Crud.Crud' => array(
 			'actions' => array('index', 'add', 'edit', 'view', 'delete')
-		)
+		) */
 		
 	);
 
