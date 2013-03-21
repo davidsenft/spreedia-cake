@@ -59,7 +59,7 @@ nav li {list-style-type:none;}
 
 #format {list-style-type:none;}
 
-button.icon, button.price {background-color:#eee;padding:2px 0 0;width:52px;cursor:pointer;text-shadow:#fff 1px 1px 0.1em;border-width:1px;}
+button.icon, button.price {background-color:#eee;margin:0;padding:2px 0 0;width:52px;cursor:pointer;text-shadow:#fff 1px 1px 0.1em;border-width:1px;}
 button.icon.over, button.price.over {background-color:#ddd;}
 button.icon.clicked, button.price.clicked {background-color:#69a128;color:#fff;text-shadow:#000 1px 1px 0;}
 
@@ -89,7 +89,7 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 .icons-selected .store {display:none;}
 .icons-selected .store.matching.pricematch {display:block;}
 
-.store {border:1px solid black;background-color:white;border-radius:10px;overflow:auto;}
+.store {border:1px solid black;background-color:white;overflow:auto;}
 .store div.storethumb {width:20%;}
 .store div.storethumb img.thumb {width:100%;border-radius:5px;}
 .store div.storeinfo {width:77%;}
@@ -101,6 +101,8 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 
 .map #wrapper {position:fixed;padding:0;width:100%;height:100%;}
 .map #map_canvas {width:100%;height:100%;}
+.map #sortbypanel {display:none;}
+.map #pricerangepanel {margin-top:0;}
 
 .storeinstance {border:1px solid #ddd;background:#eee;padding:5px;margin-top:6px;border-radius:4px;}
 .pricerange {display:inline-block;border-right:1px solid #e6e6e6;position:relative;bottom:4px;font-size:1.4em;color:#bbb;font-family:BebasRegular;padding-right:6px;} /* d82 */
@@ -132,7 +134,7 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 .gray-to-black, .gray-to-red {color:#ddd;}
 .dark-gray-to-black {color:#aaa;}
 .gray-to-black.over {color:black;}
-.gray-to-red.over {color:#a00;}
+.gray-to-red.over {color:#c43;}
 
 .nav-icons li.over {color:#666;}
 .nav-icons li.active {color:#c19928;}
@@ -147,12 +149,13 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     #hb_top li.symbol ul li {padding:7px 8px 2px;border-left:1px solid #e6e6e6;}
     #hb_top li.symbol ul li.format-search {padding-right:6px;}
 
-    div.store {padding:12px;margin-bottom:12px;}
+    div.store {padding:12px;margin-bottom:8px;}
+    div.store p.graphical {font-size:0.8em;}
 
     .list #wrapper {padding:54px 12px;}
     .list #wrapper #panel {width:100%;display:none;}
 
-    .map #wrapper #panel {width:200px;display:none;}
+    .map #wrapper #panel {width:200px;display:none;position:fixed;width:108px;top:62px;right:20px;}
 
     .fixed-for-big {position:relative;z-index:99;}
     .expandable-for-verysmall p {display:none;}
@@ -165,6 +168,12 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 
     .nav-text {padding:12px 14px;}
 
+@media all and (min-height: 470px) {
+
+    .map #wrapper #panel {display:block;}
+
+}
+
 @media all and (min-width: 500px) {
 
     /* ******************************************************************** */
@@ -175,6 +184,7 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     .scale-text {font-size:0.9em;}
     .pricerange {bottom:5px;}
     div.store {padding:15px;}
+    div.store p.graphical {font-size:0.9em;}
 }
 
 @media all and (min-width: 628px) {
@@ -199,9 +209,10 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     .list #wrapper #panel {display:block;width:108px;}
     #content {width:85%;}
 
-    .map #wrapper #panel {display:block;position:fixed;width:108px;top:84px;right:20px;}
+    .map #wrapper #panel {top:82px;}
 
-    div.store {margin-bottom:16px;}
+    div.store {margin-bottom:12px;}
+    div.store p.graphical {font-size:1em;}
 
     .nav-text {padding:22px 20px 22px 0;}
     .nav-icons {padding:10px 20px 9px 0;}
