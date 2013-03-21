@@ -63,7 +63,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	// additional init stuff for stores pages (e.g. list, map, search results)
-	Spreedia.stores_init = function(){
+	Spreedia.stores_init = function(stores){
 		console.log("initializing list/map stuff...");
 
 		// pricerange slider
@@ -101,6 +101,12 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	}
 
+	Spreedia.address = function(){
+        var loc = String(document.location);
+        var idx = loc.indexOf('#');
+        return -1 == idx ? "" : loc.substring(idx + 1);
+	}
+
 	Spreedia.handle = function(name, context){
 		console.log("loading " + name + " template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
@@ -118,10 +124,17 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// once templates are loaded
 		Spreedia.init();
-		Spreedia.stores_init();
+		Spreedia.stores_init(result["stores"]);
+	}
+
+	Spreedia.loadLocationAjax = function(id){
+		$.getJSON('/locations/view/' + id + '.json', function(result) {
+			Spreedia.loadLocation(result);
+		});
 	}
 
 	Spreedia.humanReadableDistance = function(d_km){
+		// console.log("converting " + d_km + " km...")
 		var d_factors = Spreedia.metric ? Spreedia.metricfactors : Spreedia.factors;
 		var d_units = Spreedia.metric ? Spreedia.metricunits : Spreedia.units;
 		var d = d_km * d_factors[0]; 
