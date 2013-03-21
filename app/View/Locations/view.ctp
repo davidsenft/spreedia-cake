@@ -6,6 +6,7 @@
 
 	<!-- left side panel -->
 	<div id="panel" class="left fixed-for-big">
+		<button id='bigredbutton'>PUSH ME</button>
 		<!-- <dl class="vertical tabs" style='margin-bottom:0;'>
 			<dd class="active"><a href="#simple1">List</a></dd>
 			<dd><a href="#simple2">Map</a></dd>
@@ -35,35 +36,25 @@
 <!-- ******************************************************************** -->
 <!-- HANDLEBARS TEMPLATES -->
 <!-- ******************************************************************** -->
-
-<?php $this->Handlebars->template('top');
+<?php 
+$this->Handlebars->template('top');
 $this->Handlebars->template('location');
 $this->Handlebars->template('storelist');
 $this->Handlebars->template('panel'); ?>
 
 <!-- ******************************************************************** -->
 <!-- EXTERNAL SCRIPTS -->
-<!-- SOME OF THIS SHIT SHOULD NOT NEED TO BE REPEATED... -->
 <!-- ******************************************************************** -->
 
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript">
-	window.jQuery || document.write('<script src="<?php echo $this->webroot; ?>js/jquery-1.9.1.js"><\/script>')</script>
-<script type="text/javascript" src="<?php echo $this->webroot; ?>js/jquery-ui-1.10.1.custom.min.js"></script>
-<script type="text/javascript" src="<?php echo $this->webroot; ?>js/handlebars-1.0.rc.1.js"></script>
-<script type="text/javascript" src="<?php echo $this->webroot; ?>js/handlebars-helpers.js"></script>
-<script type="text/javascript" src="<?php echo $this->webroot; ?>js/spreedia.js"></script>
-<?php if ($page['format'] == "map"){ ?>
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDKlAkDEo8E6j9NI1xru5cRCSHqCxzy2kM&sensor=false"></script>
-<script type="text/javascript" src="<?php echo $this->webroot; ?>js/spreedia-map.js"></script>
-<?php } ?>
+<?php $this->Script->loadAll($page['format']); ?>
+
 
 <!-- ******************************************************************** -->
-<!-- INITIAL DATA LOAD (cached) -->
+<!-- INITIAL DATA LOAD (cacheable) -->
 <!-- ******************************************************************** -->
 
-<?php $requri=$_SERVER['REQUEST_URI'];$jsurl=(substr($requri,-1)=='/')?$requri.'js':$requri.'/js'; ?>
-<script type="text/javascript" src="<?php echo $jsurl; ?>"></script>
+<?php $this->Script->locationData($params); ?>
+
 
 <!-- ******************************************************************** -->
 <!-- ON DOCUMENT READY -->
@@ -72,7 +63,15 @@ $this->Handlebars->template('panel'); ?>
 <script type="text/javascript">
 
 $(document).ready(function(){
-	Spreedia.loadLocation(result); // from initial data load (external js)
+	// initial data load (external js)
+	Spreedia.loadLocation(result); 
+
+	$('#bigredbutton').click(function(){
+		// ajax data load (json)
+		Spreedia.loadLocationAjax(15);
+	});
+
+	alert(Spreedia.address());
 });
 
 </script>

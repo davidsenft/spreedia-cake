@@ -120,8 +120,8 @@ class AppController extends Controller {
 
 	public function beforeFilter(){
 		// parent::beforeFilter(); ??
-		$user = $this->Auth->user();
-		$this->set('user', $user);
+		$this->set('user', $this->Auth->user());
+		$this->set('params', $this->params);
 	}
 
 }

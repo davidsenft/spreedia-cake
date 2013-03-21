@@ -22,15 +22,16 @@ class LocationsController extends AppController {
         return true;
     }
 
-	/* public function index(){
-		// $this->layout = 'basic';
-	} */
+	/* ******************************************************************** */
+	/* API VIEWS */
+	/* ******************************************************************** */
 	
-	public function view($id, $format = 'list'){
+	public function view($id = false, $format = 'list'){
+		// TODO: if id is false, show user's location
 
 		// load location if it exists
 		$this->Location->id = $id;
-		if (!$this->Location->exists() || !$this->Location->isActive())
+		if ($id != false && (!$this->Location->exists() || !$this->Location->isActive()))
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
 		$loc = $this->getContained($id);
 
@@ -41,24 +42,38 @@ class LocationsController extends AppController {
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format
 		);
-		$this->set('page', $page);
 
 		// format as list, map, or external js
+		$this->formatView($loc, $format, $page);
+	}
+
+	public function near($lat, $lng, $dist, $format){
+
+		$this->Location->findNear($lat, $lng, $dist);
+
+	}
+
+	/* ******************************************************************** */
+	/* PRIVATE HELPERS */
+	/* ******************************************************************** */
+
+	private function formatView($loc, $format, $page){
 		if ($format == 'js'){
 			// initial external js data load (cached)
 			$this->RequestHandler->renderAs($this, 'js');
-			$this->viewish($loc, $format);
+			$this->dataForView($loc, $format, $page);
 
 		}else if ($this->RequestHandler->responseType() == 'json'){
 			// subsequent ajax json requests (not cached)
-			$this->viewish($loc, $format);
+			$this->dataForView($loc, $format, $page);
 
 		}else{
 			$this->layout = 'basic';
+			$this->set('page', $page);
 		}
 	}
 
-	public function getContained($id){
+	private function getContained($id){
 		// TODO: move this to Location model?
 		// recursion/containment (allows only 3 nested locations)
 		$this->Location->recursive = 2;
@@ -82,7 +97,7 @@ class LocationsController extends AppController {
 		return $loc;
 	}
 
-	public function viewish($loc, $format){
+	private function dataForView($loc, $format, $page){
 
 		$id = $loc['Location']['id'];
 
@@ -158,8 +173,8 @@ class LocationsController extends AppController {
 		$this->set('icons', $icons);
 		$this->set('stores', $superstorenames);
 		$this->set('prices', $prices);
-		$this->set('_serialize', 
-			array('location', 'children', 'icons', 'stores', 'prices'));
+		$this->set('page', $page);
+		$this->set('_serialize', array('location', 'children', 'icons', 'stores', 'prices', 'page'));
 		
 	}
 
