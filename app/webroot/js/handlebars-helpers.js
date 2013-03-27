@@ -8,6 +8,15 @@
 Handlebars.registerHelper('img120', function(context) {
 	return "<img class='thumb' src='/images/storeimages/120/" + context.replace('.jpg','_120.jpg') + "'>";
 });
+Handlebars.registerHelper('img360', function(context) {
+	return "<img class='thumb' src='/images/storeimages/360/" + context.replace('.jpg','_360.jpg') + "'>";
+});
+Handlebars.registerHelper('img900', function(context) {
+	return "<img class='thumb' src='/images/storeimages/900/" + context.replace('.jpg','_900.jpg') + "'>";
+});
+Handlebars.registerHelper('img', function(context) {
+	return "<img class='thumb' src='/images/storeimages/full/" + context + "'>";
+});
 
 /**
  * Spreedia Icon helper

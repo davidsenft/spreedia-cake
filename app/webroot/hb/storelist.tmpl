@@ -4,14 +4,14 @@
 
 		<!-- /* THUMBNAIL IMAGE */ -->
 		<div class='storethumb left'>
-			{{#img120 this.Image.0.name}}{{/img120}}
+			{{#img360 this.Image.0.name}}{{/img360}}
 		</div>
 
 		<!-- /* STORE INFORMATION */ -->
 		<div class='storeinfo right scale-text'>
 
 			<!-- /* HEART */ -->
-			<span class='right symbol hover gray-to-red' title='Add {{this.Storename.name}} to my favorite stores'>f</span>
+			<span class='right symbol hover click heartable' title='Add {{this.Storename.name}} to my favorite stores'>f</span>
 
 			<!-- /* STORE TITLE AND COUNT */ -->
 			<h2>{{this.Storename.name}}
@@ -39,15 +39,15 @@
 			{{#each this.Localinstance}}
 				<div class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
 					<h3>{{this.locationName}}</h3>
-					<p>
+					<p class='expand'>
 						Address: {{this.storeAddress1}}
 						{{#if this.storeAddress2}}
 							<br>{{this.storeAddress2}}
 						{{/if}}
 						<br><span class='citystate'></span>, {{this.storeZip}}
 					</p>
-					<p>Store hours: {{this.storeHours}}</p>
-					<p class='distance'></p>
+					<p class='expand'>Store hours: {{this.storeHours}}</p>
+					<p class='distance'></p><!-- TODO: make sure this doesn't show in other browsers -->
 				</div>
 			{{/each}}
 

@@ -7,6 +7,7 @@
 <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 
 <title><?php echo $page['seotitle']; ?></title>
 
@@ -38,7 +39,6 @@ echo $this->Html->css('spreedia');
 <?php
 	// session/auth error messages
   // debug($user);
-  // debug($icons);
 	/* echo $this->Session->flash();
   echo $this->Session->flash('auth'); */
 ?>

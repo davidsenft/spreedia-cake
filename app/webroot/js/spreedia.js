@@ -27,6 +27,10 @@ function haversine(lat1,lng1,lat2,lng2){
 
 ;(function( Spreedia, $, undefined ) {
 
+	// user
+	Spreedia.user = false;
+	Spreedia.user = {"User":{"id":"7","username":"sheep","handle":"iamsheep"},"Savedstore":[{"id":"1","user_id":"7","storename_id":"100"}],"Managedstore":[{"id":"1","user_id":"7","storename_id":"110"}]};
+
 	// store geolocation permissions (so firefox doesn't keep asking)
 	Spreedia.askedPermission = false;
 	Spreedia.gotPermission = false;
@@ -60,10 +64,13 @@ function haversine(lat1,lng1,lat2,lng2){
 			$(this).removeClass("over");
 		});
 
+		$("#paneltabs dd a").click(function(){
+			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
+		});
 	}
 
 	// additional init stuff for stores pages (e.g. list, map, search results)
-	Spreedia.stores_init = function(stores){
+	Spreedia.initWithStores = function(stores){
 		console.log("initializing list/map stuff...");
 
 		// pricerange slider
@@ -75,12 +82,48 @@ function haversine(lat1,lng1,lat2,lng2){
 		// user location
 		Spreedia.updateDistances();
 
+		// user preferences
+		// TODO: somehow get just user prefs related to this one location?
+		// TODO: otherwise this is going ot get SLOW!!! (i think?)
+		if (Spreedia.user){
+
+			// existing hearts
+			var savedstores = Spreedia.user['Savedstore'];
+			for (x in savedstores){
+				var storename = savedstores[x]['storename_id'];
+				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked");
+			}
+
+			// new heart
+			$(".heartable").click(function(){
+				var id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
+				var clickedstore = $("this").parents(".heart").attr("data-storename");
+				var status = $("this").hasClass("clicked");
+				Spreedia.syncHeart(id, clickedstore, status);
+			});
+
+		}else{
+
+			// new heart
+			$(".heartable").click(function(){
+				// TODO: force registration while remembering the choice
+				console.log("TODO: forcing registration...");
+			});
+		}
+
 		// "list" format pages only
 		if ($("body").attr("data-format") == "list"){
 
 			// sorting
+			console.log(" > initial sort...");
+			Spreedia.sortStores();
 			$("#sortby").change(function(){
 				Spreedia.sortStores();
+			});
+
+			// format
+			$("#format").change(function(){
+				Spreedia.changeFormat();
 			});
 
 			// white gradient at the top
@@ -92,6 +135,12 @@ function haversine(lat1,lng1,lat2,lng2){
 					$("body").removeClass("offset");
 				}
 			});
+
+			// expanding
+			$(".expandable-for-verysmall").click(function(){
+				$(this).toggleClass("expanded");
+			});
+
 		}
 
 		// "map" format pages only
@@ -99,6 +148,11 @@ function haversine(lat1,lng1,lat2,lng2){
 			Spreedia.initializeMap(stores);
 		}
 
+	}
+
+	Spreedia.syncHeart = function(id, storename, status){
+		// TODO: this
+		console.log("TODO: syncing heart...");
 	}
 
 	Spreedia.address = function(){
@@ -116,15 +170,16 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	Spreedia.loadLocation = function(result){
 		// load templates
+		// TODO: is it faster to break it up like this, or just pass result to all templates?
 		console.log("loading all location page templates...");
 		Spreedia.handle("location", result["location"]);
 		Spreedia.handle("storelist", {"stores" : result["stores"]});
 		Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
-		// Spreedia.handle("top", {"page" : result["page"]});
+		Spreedia.handle("top", {"page" : result["page"]});
 
-		// once templates are loaded
-		Spreedia.init();
-		Spreedia.stores_init(result["stores"]);
+		// once templates have been loaded
+		Spreedia.init(); // TODO: move this to inside initWithStores()?
+		Spreedia.initWithStores(result["stores"]);
 	}
 
 	Spreedia.loadLocationAjax = function(id){
@@ -321,7 +376,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("updatePrice: ");
 
 		// update display
-		var display = $("#amount"), dolla = "$";
+		var display = $(".dolladisplay"), dolla = "$";
 		if (from === to) display.html(dolla.repeat(to));
 		else display.html(dolla.repeat(from) + " - " + dolla.repeat(to));
 
@@ -365,36 +420,44 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// determine if there are now any icons selected at all
 		$("body").removeClass("icons-selected");
-		var icons_clicked = $("button.icon.clicked").length;
-		if(icons_clicked>0){
+		var icons_clicked = $("button.icon.clicked");
+		if(icons_clicked.length>0){
 
 			// there are some icons selected
 			console.log(" > " + icons_clicked + " total icon(s) selected...");
 			$("body").addClass("icons-selected");
 
-				// inherit matches
-				var matchcount = $(".inherit-match").filter(":has(.matching)").addClass("matching").length;
-				console.log(" > " + matchcount + " matches found...");
+			// update panel tab text TODO: there's gotta be a better/faster way
+			var icons_html = "";
+			icons_clicked.each(function(){icons_html += $(this).html();});
+			if (icons_html.length > 4) icons_html = icons_html.substring(0,3) + "...";
+			// TODO: make sure "..." shows up in all browsers or is part of the spreedia font
+			$("#iconstab a").addClass("icon").html(icons_html);
 
-				// update .matchtext
-				console.log(" > updating store matches...");
-				$(".inherit-match").each(function(){ // TODO: native to improve speed?
-					var matchcount, matchtext;
-					if (matchcount = $(this).find(".icon.matching").length){
-						$(this).attr("data-matchcount", matchcount);
-						var percent = Math.round(100 * matchcount / icons_clicked);
-						matchtext = percent + "% Match";
-					}else{
-						$(this).attr("data-matchcount", "0");
-						matchtext = "";
-					}
-					$(this).find(".matchtext").html(matchtext);
-				});
+			// inherit matches
+			var matchcount = $(".inherit-match").filter(":has(.matching)").addClass("matching").length;
+			console.log(" > " + matchcount + " matches found...");
+
+			// update .matchtext
+			console.log(" > updating store matches...");
+			$(".inherit-match").each(function(){ // TODO: native to improve speed?
+				var matchcount // , matchtext;
+				if (matchcount = $(this).find(".icon.matching").length){
+					$(this).attr("data-matchcount", matchcount);
+					var percent = Math.round(100 * matchcount / icons_clicked.length);
+					// matchtext = percent + "% Match";
+				}else{
+					$(this).attr("data-matchcount", "0");
+					// matchtext = "";
+				}
+				// $(this).find(".matchtext").html(matchtext);
+			});
 
 		}else{
 			// there are no icons selected
 			console.log(" > no icons selected, removing all icon matches...");
 			$(".match").removeClass("matching");
+			$("#iconstab a").removeClass("icon").html("Categories");
 
 		}
 
@@ -419,6 +482,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 			// how are we sorting?
 			var sortby = $("#sortby").val();
+			var tabtext;
 			console.log(" > sorting " + visiblestores.length + " stores by " + sortby + "...");
 
 			// update distances
@@ -431,6 +495,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				switch (sortby){
 
 					case "icon":
+						tabtext = "Best Match";
 						var am = parseInt($(a).attr("data-matchcount")); // TODO: convert to native DOM for speed?
 						var bm = parseInt($(b).attr("data-matchcount")); // ...
 						var at = parseInt($(a).attr("data-iconcount")); // ...
@@ -453,28 +518,33 @@ function haversine(lat1,lng1,lat2,lng2){
 					 	break;
 
 					case "price-low-hi":
+						tabtext = "Price Low->Hi";
 						var ranka = pricerank[$(a).attr("data-pricerange") - 1];
 						var rankb = pricerank[$(b).attr("data-pricerange") - 1];
 						var result = ranka > rankb ? 1 : ranka == rankb ? (Math.floor(Math.random()*2)*2)-1 : -1;
 						break;
 
 					case "price-hi-low":
+						tabtext = "Price Hi->Low";
 						var ranka = pricerank[$(a).attr("data-pricerange") - 1];
 						var rankb = pricerank[$(b).attr("data-pricerange") - 1];
 						var result = ranka < rankb ? 1 : ranka == rankb ? (Math.floor(Math.random()*2)*2)-1 : -1;
 						break;
 
 					case "alphabetical":
+						tabtext = "Alphabetical";
 						var ranka = $(a).attr("data-alphasort");
 						var rankb = $(b).attr("data-alphasort");
 						var result = ranka > rankb ? 1 : ranka == rankb ? (Math.floor(Math.random()*2)*2)-1 : -1;
 						break;
 
 					case "random":
+						tabtext = "Random";
 						var result = (Math.floor(Math.random()*2)*2)-1;
 						break;
 
 					case "location":
+						tabtext = "Closest to Me";
 						var ranka = $(a).attr("data-distance");
 						var rankb = $(b).attr("data-distance");
 						var result = ranka > rankb ? 1 : ranka == rankb ? (Math.floor(Math.random()*2)*2)-1 : -1;
@@ -485,6 +555,8 @@ function haversine(lat1,lng1,lat2,lng2){
 				return result;
 			});
 
+			$("#sortbytab a").html("Sort by: " + tabtext);
+
 
 		}else{
 			// no stores to sort
@@ -494,6 +566,12 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		console.log("// end sortStores");
 
+	}
+
+	Spreedia.changeFormat = function(){
+		console.log("changeFormat:");
+
+		console.log("// end changeFormat");
 	}
 
 }( window.Spreedia = window.Spreedia || {}, jQuery ));

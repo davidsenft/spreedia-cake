@@ -4,6 +4,7 @@
 	var TILE_SIZE=256;function bound(value,opt_min,opt_max){if(opt_min!=null)value=Math.max(value,opt_min);if(opt_max!=null)value=Math.min(value,opt_max);return value}function degreesToRadians(deg){return deg*(Math.PI/180)}function radiansToDegrees(rad){return rad/(Math.PI/180)}function MercatorProjection(){this.pixelOrigin_=new google.maps.Point(TILE_SIZE/2,TILE_SIZE/2);this.pixelsPerLonDegree_=TILE_SIZE/360;this.pixelsPerLonRadian_=TILE_SIZE/(2*Math.PI)}MercatorProjection.prototype.fromLatLngToPoint=function(latLng,opt_point){var me=this;var point=opt_point||new google.maps.Point(0,0);var origin=me.pixelOrigin_;point.x=origin.x+latLng.lng()*me.pixelsPerLonDegree_;var siny=bound(Math.sin(degreesToRadians(latLng.lat())),-0.9999,0.9999);point.y=origin.y+0.5*Math.log((1+siny)/(1-siny))*-me.pixelsPerLonRadian_;return point};MercatorProjection.prototype.fromPointToLatLng=function(point){var me=this;var origin=me.pixelOrigin_;var lng=(point.x-origin.x)/me.pixelsPerLonDegree_;var latRadians=(point.y-origin.y)/-me.pixelsPerLonRadian_;var lat=radiansToDegrees(2*Math.atan(Math.exp(latRadians))-Math.PI/2);return new google.maps.LatLng(lat,lng)};
 
 	Spreedia.initializeMap = function(stores){
+		console.log("initializing the map...");
 
 		// map style
 		var spreediaStyle = [
@@ -71,7 +72,7 @@
 			new google.maps.MarkerImage("/images/mapimages/marker-white.png"); // FIX
 
 		// private vars for store loop
-		var bounds = new google.maps.LatLngBounds();
+		Spreedia.bounds = new google.maps.LatLngBounds();
 		var storelatlngs = new Array();
 		var storepins = new Array();
 		var ghostpins = new Array();
@@ -97,7 +98,7 @@
 
 					// store this lat/lng and extend the map bounds
 					storelatlngs.push(pos);
-					bounds.extend(pos);
+					Spreedia.bounds.extend(pos);
 
 					// place topmost pin with store id for clicking and hovering
 					Spreedia.pins[store.id] = new google.maps.Marker({
@@ -128,7 +129,7 @@
 			}
 		}
 
-		Spreedia.map.fitBounds(bounds);
+		Spreedia.map.fitBounds(Spreedia.bounds);
 
 		// visual store markers, id-blind
 		storelatlngs.sort(function(a, b){return b.lat() - a.lat();}); // experiment
@@ -141,10 +142,21 @@
 			}));
 		}
 
+		// TODO: make sure this still works here!!
+		$(window).resize(function(){
+		// TODO: check this on other browsers
+			Spreedia.repositionMap();
+		});
+
+	};
+
+	Spreedia.repositionMap = function(){
+		console.log("repositioning the map...");
+		Spreedia.map.fitBounds(Spreedia.bounds);
 	};
 
 	Spreedia.openTheInfoWindow = function(id_to_open){
-		
+		console.log("opening the info window...");
 		if (Spreedia.pins[id_to_open]){
 
 			// populate and open the info window
@@ -176,6 +188,6 @@
 		var track_id = "<?php echo md5(session_id()); ?>";
 		var speshloc = "<?php echo $spesh->loc; ?>";
 		$.post("/tracker.php", {page: "loc", id: speshloc, type: "info", click: id_to_open, trackid: track_id}); */
-	}
+	};
 
 }( window.Spreedia = window.Spreedia || {}, jQuery ));

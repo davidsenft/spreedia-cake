@@ -4,14 +4,15 @@
 
 	<!-- <div id='hb_location'></div> -->
 
-	<!-- left side panel -->
-	<div id="panel" class="left fixed-for-big">
-		<button id='bigredbutton'>PUSH ME</button>
-		<!-- <dl class="vertical tabs" style='margin-bottom:0;'>
-			<dd class="active"><a href="#simple1">List</a></dd>
-			<dd><a href="#simple2">Map</a></dd>
-			<dd><a href="#simple3">Activity</a></dd>
-		</dl> -->
+	<!-- panel tabs -->
+	<dl id="paneltabs">
+		<dd id="sortbytab"><a href="javascript:void()" data-panel="sortby">Sort</a></dd>
+		<dd id="pricerangetab"><a href="javascript:void()" data-panel="pricerange" class="dolladisplay">$-$$$$</a></dd>
+		<dd id="iconstab"><a href="javascript:void()" data-panel="icons">Categories</a></dd>
+	</dl>
+
+	<!-- panel -->
+	<div id="panel" class="left">
 		<div id='hb_panel' class='panel' style='border-top:0;'></div>
 	</div>
 
@@ -26,7 +27,7 @@
 	<?php }else{ ?>
 
 	<!-- store list -->
-	<div id="content" class="right">
+	<div id="content">
 		<div id='hb_storelist'></div>
 	</div>
 	<?php } ?>
@@ -66,12 +67,12 @@ $(document).ready(function(){
 	// initial data load (external js)
 	Spreedia.loadLocation(result); 
 
-	$('#bigredbutton').click(function(){
+	/* $('#bigredbutton').click(function(){
 		// ajax data load (json)
 		Spreedia.loadLocationAjax(15);
-	});
+	}); */
 
-	alert(Spreedia.address());
+	// alert(Spreedia.address());
 });
 
 </script>

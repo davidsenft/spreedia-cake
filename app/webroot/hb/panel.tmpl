@@ -1,4 +1,13 @@
-<div id='sortbypanel'>
+<div id='formatpanel' class='subpanel'>
+	Format: &nbsp;
+	<select id='format'>
+		<option value='list'>List</option>
+		<option value='map'>Map</option>
+		<option value='activity'>Distance</option>
+	</select>
+</div>
+
+<div id='sortbypanel' class='subpanel'>
 	Sort by: &nbsp;
 	<select id='sortby'>
 		<option value='icon'>Best match</option>
@@ -16,8 +25,8 @@
 	{{/with}}
 {{/each}} -->
 
-<div id='pricerangepanel'>
-	<div id='amount'></div>
+<div id='pricerangepanel' class='subpanel'>
+	<div class='dolladisplay'></div>
 	<div id='slider-pricerange'></div>
 	<div id='steps'>
         <span class="tick">|<br><span class='pricemarker'>$</span></span>
@@ -27,8 +36,10 @@
     </div>
 </div>
 
+<div id='iconspanel' class='subpanel'>
 {{#each icons}}
 	{{#with Icon}}
 		<button data-id='{{this.id}}' class='icon hover click'>{{this.char}}</button>
 	{{/with}}
 {{/each}}
+</div>

@@ -22,13 +22,13 @@ class ScriptHelper extends AppHelper {
 <script type="text/javascript" src="<?php echo $this->webroot; ?>js/handlebars-helpers.js"></script>
 <script type="text/javascript" src="<?php echo $this->webroot; ?>js/spreedia.js"></script><?php 
 
-		if ($format == "map"){ 
+		/* if ($format == "map"){ TODO: load this asynchronously in changeFormat() as needed? */
 
 		?>
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDKlAkDEo8E6j9NI1xru5cRCSHqCxzy2kM&sensor=false"></script>
 <script type="text/javascript" src="<?php echo $this->webroot; ?>js/spreedia-map.js"></script><?php 
 
-		}
+		/*} */
 
 	}
 	
