@@ -25,6 +25,17 @@ class User extends AppModel {
         )
     );
 
+    public $hasMany = array(
+		'Savedstore' => array(
+			'className'    => 'Savedstore',
+			'dependent'    => true
+		),
+		'Managedstore' => array(
+			'className'    => 'Managedstore',
+			'dependent'    => true
+		)
+	);
+
 	public function beforeSave($options = array()) {
 	    // parent::beforeSave($options);
 	    if (!empty($this->data[$this->alias]['pwd-unhashed'])) {
@@ -37,5 +48,7 @@ class User extends AppModel {
 	public function index(){
 		
 	}
+
+
 
 }

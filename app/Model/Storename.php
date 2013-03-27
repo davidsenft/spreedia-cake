@@ -34,6 +34,10 @@ class Storename extends AppModel {
 		'Activestorename' => array(
 			'className'    => 'Activestorename',
 			'dependent'    => true
+		),
+		'Managedstore' => array(
+			'className'    => 'Managedstore',
+			'dependent'    => true
 		)
 	);
 	
@@ -41,15 +45,15 @@ class Storename extends AppModel {
 		'Icon' => array(
 			'className'    => 'Icon',
 			'order'        => 'Icon.name ASC'
-		),
-		'Activity' => array(
+		)
+		/* , 'Activity' => array(
 			'className'    => 'Activity',
 			'joinTable'    => 'activities_storenames',
 			'associationForeignKey'   => 'storename_id' // ,
 			/* 'conditions'   => array(
 				'Activity.statusID' => '1',
-			) */
-		)
+			) 
+		) */
 	);
       
 }
