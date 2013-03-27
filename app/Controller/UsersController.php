@@ -60,7 +60,12 @@ class UsersController extends AppController {
         if (!$this->User->exists()) {
             throw new NotFoundException(__('Invalid user'));
         }
-        $this->set('user', $this->User->read(null, $id));
+
+        $user = $this->User->read(null, $id);
+        unset($user['User']['password']);
+
+        $this->set('user', $user);
+        $this->set('_serialize', array('user'));
     }
 
 
