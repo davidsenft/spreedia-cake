@@ -18,10 +18,6 @@ class LocationsController extends AppController {
 
 	// $this->Api->allowPublic('add'); ????
 
-	public function isAuthorized() {
-        return true;
-    }
-
 	/* ******************************************************************** */
 	/* API VIEWS */
 	/* ******************************************************************** */

@@ -124,4 +124,8 @@ class AppController extends Controller {
 		$this->set('params', $this->params);
 	}
 
+	public function isAuthorized() {
+        return true;
+    }
+
 }

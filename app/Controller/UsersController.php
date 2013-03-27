@@ -17,10 +17,6 @@ class UsersController extends AppController {
         parent::beforeFilter();
         $this->Auth->allow('register');
     }
-
-    public function isAuthorized() {
-        return true;
-    }
       
     public function register() {
         
