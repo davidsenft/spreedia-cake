@@ -42,19 +42,20 @@ a {text-decoration:none;color:#79a128;} a:hover {color: #488720;} /* old green: 
     width:100%;
     position:fixed;
     z-index:98;
-    background:#79a128 url('/images/bgnoise-gradient.png');
+    background:#fff url('/images/bgnoise-gradient.png');
     border-bottom:1px solid #e6e6e6;
-    text-shadow:#000 1px 1px 0.1em;
+    text-shadow:#fff 1px 1px 0.1em;
+    border-bottom:1px solid #ccc;
 }
 
-.offset #hb_top {
+.list.offset #hb_top {
     -moz-box-shadow: 0 30px 30px 5px #f6f6f6;
     -webkit-box-shadow: 0 30px 30px 5px #f6f6f6;
     box-shadow: 0 30px 30px 5px #f6f6f6;
 }
 
 /* maybe? could just be same as above */
-.offset #paneltabs {
+.list.offset #paneltabs {
     -moz-box-shadow: 0 8px 8px 5px rgba(90,90,90,0.4);
     -webkit-box-shadow: 0 8px 8px 5px rgba(90,90,90,0.4);
     box-shadow: 0 8px 8px 5px rgba(90,90,90,0.4);
@@ -64,7 +65,8 @@ a {text-decoration:none;color:#79a128;} a:hover {color: #488720;} /* old green: 
 nav {width:100%;position:fixed;}
 nav li {list-style-type:none;}
 
-#format {list-style-type:none;}
+#format {list-style-type:none;float:right;}
+#format li {float:left;}
 
 button.icon, button.price {background-color:#eee;margin:0;padding:2px 0 0;width:52px;cursor:pointer;text-shadow:#fff 1px 1px 0.1em;border-width:1px;}
 button.icon.over, button.price.over {background-color:#ddd;}
@@ -72,8 +74,8 @@ button.icon.clicked, button.price.clicked {background-color:#79a128;color:#fff;t
 
 button.price {padding-bottom:3px;font-family:BebasRegular;}
 
-#sortbypanel, #formatpanel {background:#eee;text-align:center;font-family:BebasRegular;word-spacing:0.3em;font-size:0.7em;}
-select#sortby, select#format {margin:0 auto;font-family:Arial;}
+#sortbypanel {background:#eee;text-align:center;font-family:BebasRegular;word-spacing:0.3em;font-size:0.7em;}
+#sortbypanel select#sortby {margin:0 auto;font-family:Arial;}
 
 /* PRICE RANGE SLIDER */
 #pricerangepanel {background:#eee;text-align:center;}
@@ -101,7 +103,7 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
 .store div.storeinfo {width:75%;}
 .store .matchtext {color:#79a128;font-family:BebasRegular;word-spacing:0.3em;position:relative;left:5px;bottom:9px;}
 
-#panel, #paneltabs {position:fixed;z-index:99;}
+#panel, #paneltabs {position:fixed;z-index:99;top:41px;}
 
 #paneltabs {border-bottom:1px solid #ccc;font-family:Roboto;font-size:0.9em;background-color:#888;}
 #paneltabs dd {float:left;display:block;background-image:url('/images/bgnoise-gradient.png');}
@@ -111,21 +113,22 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
 #pricerangetab a {border-left:1px solid #ddd;border-right:1px solid #ddd;}
 #iconstab a.icon {font-size:1.4em;}
 
+.list #map, .map #list {display:none;}
 .list #wrapper {overflow:auto;}
 
 .map #wrapper {position:fixed;padding:0;width:100%;height:100%;}
 .map #map_canvas {width:100%;height:100%;}
-.map #sortbypanel {display:none;}
+.map #sortbypanel {display:none!important;}
 .map #pricerangepanel {margin-top:0;}
 
 .storeinstance {border:1px solid #ddd;background:#eee;padding:5px;margin-top:6px;border-radius:4px;}
 .pricerange {display:inline-block;border-right:1px solid #e6e6e6;position:relative;bottom:4px;font-size:1.4em;color:#bbb;font-family:BebasRegular;padding-right:6px;} /* d82 */
 
-.tabs.vertical dd, .tabs.vertical li { border-left: 3px solid #cccccc; }
+/* .tabs.vertical dd, .tabs.vertical li { border-left: 3px solid #cccccc; }
 .tabs.vertical dd a, .tabs.vertical li a { background: #f2f2f2; border: none; border: 1px solid #e6e6e6; border-width: 1px 1px 0 0; color: #555; display: block; font-size: 14px; height: auto; line-height: 1; padding: 15px 20px; -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
 .tabs.vertical dd.active, .tabs.vertical li.active { margin-top: 0; border-top: 1px solid #bbb; border-left: 4px solid #79a128; }
 .tabs.vertical dd.active a, .tabs.vertical li.active a { background: #fff; border: none; color: #000; height: auto; margin: 0; position: static; top: 0; -webkit-box-shadow: 0 0 0; -moz-box-shadow: 0 0 0; box-shadow: 0 0 0; }
-.tabs.vertical dd:first-child a.active, .tabs.vertical li:first-child a.active { margin: 0; }
+.tabs.vertical dd:first-child a.active, .tabs.vertical li:first-child a.active { margin: 0; } */
 
 /* ******************************************************************** */
 /* CLASSES */
@@ -153,18 +156,20 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
 .heartable.over {text-transform:uppercase;}
 .heartable.clicked {color:#c43;text-transform:uppercase;text-shadow:1px 1px 1px #ccc;}
 
-.nav-icons li.over {color:#666;}
-.nav-icons li.active {color:#c19928;}
+.nav-icons li, #format li {color:#ccc;}
+.nav-icons li.over, #format li.over {color:#aaa;}
+.nav-icons li.active, #format li.active {color:#79a128;}
 
 /* ******************************************************************** */
 /* 'VERYSMALL' */
 /* ******************************************************************** */
 
-    #logo {width:140px;font-size:28px;position:absolute;left:50%;top:10px;margin-left:-70px;text-align:center;} /* padding was padding:10px 0 0 12px; */
+    #logo {width:120px;font-size:28px;position:absolute;left:50%;top:4px;padding-top:5px;margin-left:-70px;text-align:center;border-radius:4px;} /* padding was padding:10px 0 0 12px; */
     h1 {font-size:20px;padding:10px 12px;}
     #hb_top {height:40px;}
     #hb_top li.symbol ul li {padding:7px 8px 2px;border-left:1px solid #e6e6e6;}
     #hb_top li.symbol ul li.format-search {padding-right:6px;}
+    .top-height {height:82px;}
 
     div.store {padding:12px;margin-bottom:8px;}
     div.store p.graphical {font-size:0.8em;}
@@ -175,10 +180,10 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
     .map #wrapper #panel {width:200px;width:108px;top:62px;right:20px;}
 
     .list #wrapper {padding:41px 0 22px;} /* was 54, 12 */
-    .list #wrapper #content {padding:54px 12px 0;}
+    .list #wrapper #list {padding:54px 12px 0;}
     .list #wrapper #panel {top:81px;width:100%;}
 
-    #formatpanel, #sortbypanel, #pricerangepanel, #iconspanel {float:left;padding:10px 0;}
+    #sortbypanel, #pricerangepanel, #iconspanel {float:left;padding:10px 0;}
     #sortbypanel, #iconspanel {width:33%;} #pricerangepanel {width:34%;}
 
     .subpanel {display:none;}
@@ -194,6 +199,8 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
     .hide-for-small {display:none!important;}
     .hide-for-small-if-inactive {display:none!important;}
     .hide-for-small-if-inactive.active {display:block!important;}
+
+    #format {padding:6px;}
 
     .show-for-verybig {display:none!important;}
 
@@ -242,16 +249,17 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
 
     .list #wrapper {padding:80px 20px;width:828px;}
     .list #wrapper #panel {top:80px;display:block;width:108px;}
-    .list #wrapper #content {width:85%;padding:0;float:right;}
+    .list #wrapper #list {width:85%;padding:0;float:right;}
 
     /* TODO: make this just for list, separate rules for map */
-    #formatpanel, #sortbypanel, #pricerangepanel {width:90px;padding:8px;border:1px solid #ccc;}
-    #pricerangepanel {margin:4px 0;} #sortbypanel {margin-top:4px;}
+    #sortbypanel, #pricerangepanel {width:90px;padding:8px;border:1px solid #ccc;}
+    #pricerangepanel {margin:4px 0;} /* #sortbypanel {margin-top:4px;} */
     #iconspanel {padding:0;width:108px;}
+    #sortbypanel select#sortby {margin-top:4px;}
 
     #paneltabs {display:none;}
 
-    .subpanel {display:block!important;}
+    .subpanel {display:block;}
 
     div.store {margin-bottom:12px;}
     div.store p.graphical {font-size:1em;}
@@ -262,10 +270,10 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
     .hide-for-small {display:inline-block!important;}
     .hide-for-small-if-inactive {display:block!important;}
 
+    #format {padding:17px;}
+
     .store div.storethumb {width:25%;}
     .store div.storeinfo {width:72%;}
-
-    select#sortby, select#format {margin-top:4px;}
 
 }
 
@@ -277,12 +285,12 @@ select#sortby, select#format {margin:0 auto;font-family:Arial;}
 
     .list #wrapper {width:960px;}
     .list #wrapper #panel {width:220px;}
-    .list #wrapper #content {width:75%;}
+    .list #wrapper #list {width:75%;}
 
-    .list #formatpanel, .list #sortbypanel, .list #pricerangepanel {width:202px;padding:8px;border:1px solid #ccc;}
+    .list #sortbypanel, .list #pricerangepanel {width:202px;padding:8px;border:1px solid #ccc;}
     .list #pricerangepanel {margin:4px 0;}
     .list #iconspanel {width:220px;}
-    select#sortby, select#format {margin-top:0;}
+    #sortbypanel select#sortby {margin-top:0;}
 
     .show-for-verybig {display:inline;}
 

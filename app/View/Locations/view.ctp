@@ -11,26 +11,21 @@
 		<dd id="iconstab"><a href="javascript:void()" data-panel="icons">Categories</a></dd>
 	</dl>
 
-	<!-- panel -->
+	<!-- panel TODO: this doesn't really need to be a template -->
 	<div id="panel" class="left">
 		<div id='hb_panel' class='panel' style='border-top:0;'></div>
 	</div>
 
-	<?php if ($page['format'] == 'map'){ ?>
-
-	<!-- map -->
-	<table style='width:100%;height:100%;'>
+	<!-- stores map -->
+	<table id="map" class="content_view" style='width:100%;height:100%;'>
 		<tr class='top-height'><td>&nbsp;</td></tr>
 		<tr><td id='map_canvas'>&nbsp;</td></tr>
 	</table>
 
-	<?php }else{ ?>
-
-	<!-- store list -->
-	<div id="content">
+	<!-- stores list -->
+	<div id="list" class="content_view">
 		<div id='hb_storelist'></div>
 	</div>
-	<?php } ?>
 
 </div>
 
@@ -65,11 +60,12 @@ $this->Handlebars->template('panel'); ?>
 
 $(document).ready(function(){
 	// initial data load (external js)
-	Spreedia.loadLocation(result); 
+	Spreedia.result = result; // TODO: make this Spreedia.load(result) ??
+	Spreedia.loadLocationData(); 
 
 	/* $('#bigredbutton').click(function(){
 		// ajax data load (json)
-		Spreedia.loadLocationAjax(15);
+		Spreedia.loadLocationDataById(15);
 	}); */
 
 	// alert(Spreedia.address());

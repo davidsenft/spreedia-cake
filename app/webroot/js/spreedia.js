@@ -27,6 +27,10 @@ function haversine(lat1,lng1,lat2,lng2){
 
 ;(function( Spreedia, $, undefined ) {
 
+	// current app data
+	Spreedia.result = false;
+	Spreedia.matchingstores = 0;
+
 	// user
 	Spreedia.user = false;
 	Spreedia.user = {"User":{"id":"7","username":"sheep","handle":"iamsheep"},"Savedstore":[{"id":"1","user_id":"7","storename_id":"100"}],"Managedstore":[{"id":"1","user_id":"7","storename_id":"110"}]};
@@ -42,59 +46,163 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.metricfactors = new Array(1, 1000);
 	Spreedia.metricunits = new Array("km", "m");
 
-	// runs on page load, once templates have been loaded
+	// Actually only happens once per page load
 	Spreedia.init = function(){
-		console.log("initializing listeners...");
-		// TODO: move these event listeners to another function that can be called after ajax loads?
+		// call the appropriate data type init
+	}
 
-		// activate (add .active class) according to page format
-		$(".format").filter("[data-activate='" + $("body").data("format") + "']").addClass("active");
+	Spreedia.changeDataType = function(){
+		// call the appropriate data type init
+	}
 
-		// anything with .click class
-		$(".click").click(function(){
-			$(this).toggleClass("clicked");
-			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
-			// else if ($(this).is("button.price")) Spreedia.updatePrice($(this).attr("data-id"));
-		});
+	Spreedia.changeFormat = function(format){
+		// TODO: maybe change this to setFormat? call from init() or init_stores()?
+		console.log("changeFormat: " + format);
 
-		// anything with .hover class gets .over class on hover
-		$(".hover").hover(function(){
-			$(this).addClass("over");
-		},function(){
-			$(this).removeClass("over");
-		});
+		// hide current content view
+		$(".content_view").hide();
 
-		$("#paneltabs dd a").click(function(){
-			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
+		// get new format
+		switch (format){
+
+			case "list":
+				$("body").removeClass("map").addClass("list").attr("data-format", "list");
+				$("#list").show();
+				// TODO: only load storelist if it hasn't been loaded, or always load it?
+				// Spreedia.loadLocationData(Spreedia.result);
+				break;
+
+			case "map":
+				$("body").removeClass("list").addClass("map").attr("data-format", "map");
+				$("#map").show();
+				if (!Spreedia.map) Spreedia.initializeMap();
+				Spreedia.repositionMap();
+				break;
+
+		}
+
+		Spreedia.activateFormat();
+
+		console.log("// end changeFormat");
+	}
+
+	/*********************************************************** 
+	 * DATA TYPE INITS 
+	 * These are called only by init() or by changeDataType()
+	 ***********************************************************/
+
+	Spreedia.initLocation = function(){
+
+	}
+
+	Spreedia.initFavorites = function(){
+
+	}
+
+	// etc...
+
+	/*********************************************************** 
+	 * DATA LOADS 
+	 * These are called only by data type init or by user action
+	 ***********************************************************/
+
+	// Called after Spreedia.result has been changed
+	Spreedia.loadLocationData = function(){
+		console.log("loadLocationData:");
+
+		// load templates
+		Spreedia.loadManyStoresTemplates();
+		Spreedia.loadLocationTemplates();
+
+		// add general listeners to loaded templates
+		Spreedia.addListeners();
+
+		// "map" format pages only TODO: rethink?
+		if ($("body").attr("data-format") == "map"){
+			Spreedia.initializeMap();
+		}
+	}
+
+	Spreedia.loadLocationDataById = function(id){
+		$.getJSON('/locations/view/' + id + '.json', function(result) {
+			Spreedia.result = result;
+			Spreedia.loadLocationData();
 		});
 	}
 
-	// additional init stuff for stores pages (e.g. list, map, search results)
-	Spreedia.initWithStores = function(stores){
-		console.log("initializing list/map stuff...");
+	/*********************************************************** 
+	 * TEMPLATES
+	 ***********************************************************/
 
-		// pricerange slider
+	Spreedia.loadManyStoresTemplates = function(){
+		console.log("loadManyStoresTemplates:");
+		r = Spreedia.result;
+		// TODO: is it faster to break it up like this, or just pass result to all templates?
+		Spreedia.handle("panel", {"icons" : r["icons"], "prices" : r["prices"]});
+		Spreedia.handle("top", {"page" : r["page"]});
+
+		// pricerange filter slider
 		var range = $("#slider-pricerange");
 		function slidefunc(event, ui){Spreedia.updatePrice(ui.values[0], ui.values[1]);}
 		range.slider({range: true, min: 1, max: 4, values: [ 1, 4 ], slide: slidefunc});
+		// TODO: this should not happen yet!!
 		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
 
-		// user location
-		Spreedia.updateDistances();
+		// format listener
+		$("#format li").click(function(){
+			Spreedia.changeFormat($(this).attr("data-activate"));
+		});
+
+		// white gradient at the top when scrolling
+		$(window).scroll(function () {
+			var offset = Spreedia.getScrollOffset();
+			if (offset > 0){
+				$("body").addClass("offset");
+			}else{
+				$("body").removeClass("offset");
+			}
+		});
+	}
+
+	Spreedia.loadLocationTemplates = function(){
+		console.log("loadLocationTemplates:");
+
+		r = Spreedia.result;
+		// TODO: don't need location template at all no how?
+		Spreedia.handle("location", r["location"]);
+		// TODO: don't load storelist if in map mode? or do?
+		Spreedia.handle("storelist", {"stores" : r["stores"]});
+
+		// TODO: rethink how all this works if list and map are the same?
+		if ($("body").attr("data-format") == "list"){
+
+			// expanding TODO: are we still doing this?
+			// TODO: do this only for lists?
+			$(".expandable-for-verysmall").click(function(){
+				$(this).toggleClass("expanded");
+			});
+
+			// sorting
+			console.log(" > sorting...");
+			Spreedia.sortStores();
+			$("#sortby").change(function(){
+				Spreedia.sortStores();
+			});
+		}
 
 		// user preferences
 		// TODO: somehow get just user prefs related to this one location?
 		// TODO: otherwise this is going ot get SLOW!!! (i think?)
 		if (Spreedia.user){
 
-			// existing hearts
+			// show existing hearts
 			var savedstores = Spreedia.user['Savedstore'];
 			for (x in savedstores){
 				var storename = savedstores[x]['storename_id'];
 				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked");
 			}
 
-			// new heart
+			// listen for new hearts
 			$(".heartable").click(function(){
 				var id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
 				var clickedstore = $("this").parents(".heart").attr("data-storename");
@@ -104,50 +212,73 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		}else{
 
-			// new heart
+			// force registration for new hearts
 			$(".heartable").click(function(){
 				// TODO: force registration while remembering the choice
 				console.log("TODO: forcing registration...");
 			});
 		}
 
-		// "list" format pages only
-		if ($("body").attr("data-format") == "list"){
+		// update user location
+		Spreedia.updateDistances();
+	}
 
-			// sorting
-			console.log(" > initial sort...");
-			Spreedia.sortStores();
-			$("#sortby").change(function(){
-				Spreedia.sortStores();
-			});
+	Spreedia.handle = function(name, context){
+		console.log(" > loading '" + name + "' template...");
+		var template = Handlebars.compile($("#" + name + "-template").html());
+		var html = template(context);
+		$("#hb_" + name).html(html);
+	}
 
-			// format
-			$("#format").change(function(){
-				Spreedia.changeFormat();
-			});
+	/*********************************************************** 
+	 * MISCELLANY / HELPERS
+	 ***********************************************************/
 
-			// white gradient at the top
-			$(window).scroll(function () {
-				var offset = Spreedia.getScrollOffset();
-				if (offset > 0){
-					$("body").addClass("offset");
-				}else{
-					$("body").removeClass("offset");
-				}
-			});
+	// runs once templates have been loaded 
+	// TODO: better fn name? not all listeners
+	// TODO: DOES THIS HAPPEN ONCE PER DATA LOAD OR ONCE PER FORMAT LOAD?
+	Spreedia.addListeners = function(){
+		console.log("adding listeners to loaded templates...");
+		// TODO: move these event listeners to another function that can be called after ajax loads?
 
-			// expanding
-			$(".expandable-for-verysmall").click(function(){
-				$(this).toggleClass("expanded");
-			});
+		// activate (add .active class) according to page format
+		// potentially just call changeFormat here? call it setFormat?
+		// TODO: definitely move this! probs to init() or initLocation(), etc.
+		Spreedia.activateFormat();
 
-		}
+		// anything with .click class
+		// THIS IS IN THE CORRECT PLACE!
+		$(".click").click(function(){
+			$(this).toggleClass("clicked");
+			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
+			// else if ($(this).is("button.price")) Spreedia.updatePrice($(this).attr("data-id"));
+		});
 
-		// "map" format pages only
-		if ($("body").attr("data-format") == "map"){
-			Spreedia.initializeMap(stores);
-		}
+		// anything with .hover class gets .over class on hover
+		// THIS IS IN THE CORRECT PLACE!
+		$(".hover").hover(function(){
+			$(this).addClass("over");
+		},function(){
+			$(this).removeClass("over");
+		});
 
+		// click panel tabs to toggle on/off
+		// TODO: probably getting rid of this, but if not, only needs to be called once in init()
+		$("#paneltabs dd a").click(function(){
+			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
+		});
+
+		// manystores-specific listeners
+		// TODO: use data-type instead?
+		/* if ($("body").hasClass("manystores")){
+			// this is where the locationy listeners were
+		} */
+	}
+
+	// Called by addListeners() and by changeFormat()
+	Spreedia.activateFormat = function(){
+		console.log("activating format...");
+		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
 	}
 
 	Spreedia.syncHeart = function(id, storename, status){
@@ -159,33 +290,6 @@ function haversine(lat1,lng1,lat2,lng2){
         var loc = String(document.location);
         var idx = loc.indexOf('#');
         return -1 == idx ? "" : loc.substring(idx + 1);
-	}
-
-	Spreedia.handle = function(name, context){
-		console.log("loading " + name + " template...");
-		var template = Handlebars.compile($("#" + name + "-template").html());
-		var html = template(context);
-		$("#hb_" + name).html(html);
-	}
-
-	Spreedia.loadLocation = function(result){
-		// load templates
-		// TODO: is it faster to break it up like this, or just pass result to all templates?
-		console.log("loading all location page templates...");
-		Spreedia.handle("location", result["location"]);
-		Spreedia.handle("storelist", {"stores" : result["stores"]});
-		Spreedia.handle("panel", {"icons" : result["icons"], "prices" : result["prices"]});
-		Spreedia.handle("top", {"page" : result["page"]});
-
-		// once templates have been loaded
-		Spreedia.init(); // TODO: move this to inside initWithStores()?
-		Spreedia.initWithStores(result["stores"]);
-	}
-
-	Spreedia.loadLocationAjax = function(id){
-		$.getJSON('/locations/view/' + id + '.json', function(result) {
-			Spreedia.loadLocation(result);
-		});
 	}
 
 	Spreedia.humanReadableDistance = function(d_km){
@@ -286,23 +390,19 @@ function haversine(lat1,lng1,lat2,lng2){
 	    // var x = 0, y = 0;
 	    var y = 0;
 	    if( typeof( window.pageYOffset ) == 'number' ) {
-	        // Netscape
-	        // x = window.pageXOffset;
+	        // Netscape // x = window.pageXOffset;
 	        y = window.pageYOffset;
 	    } else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) {
-	        // DOM
-	        // x = document.body.scrollLeft;
+	        // DOM // x = document.body.scrollLeft;
 	        y = document.body.scrollTop;
 	    } else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) {
-	        // IE6 standards compliant mode
-	        // x = document.documentElement.scrollLeft;
+	        // IE6 standards compliant mode // x = document.documentElement.scrollLeft;
 	        y = document.documentElement.scrollTop;
 	    }
 	    // return [x, y];
 	    return y;
 	}	
 
-	// returns true/false to indicate if position is supported
 	Spreedia.updateDistances = function(){
 		console.log("updateDistances:");
 
@@ -369,7 +469,6 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		console.log("// end updateDistances");
-
 	}
 
 	Spreedia.updatePrice = function(from, to){
@@ -397,7 +496,14 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		// show message if no stores are visible
-		var visiblestores = $(".store").filter(":visible");
+		var num_icons_clicked = $("button.icon.clicked").length;
+		if (num_icons_clicked == 0){
+			// .matching doesn't matter, just count stores that match price
+			var visiblestores = $(".store").filter(".pricematch");
+		}else{
+			// count stores that match icons and price
+			var visiblestores = $(".store").filter(".matching.pricematch");
+		}
 		if (visiblestores.length == 0){
 			console.log(" > no stores are visible, showing message...");
 			$("#nomatches").show();
@@ -412,6 +518,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("updateIcon: " + id_to_update);
 
 		// update icon matches (TODO: is toggling rigorous enough?)
+		// TODO: might be good to make this reset and add matching for the sake of .pricematch.matching stuff...
 		$(".match").filter("[data-icon='" + id_to_update + "']").toggleClass("matching");
 
 		// clean slate
@@ -424,7 +531,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		if(icons_clicked.length>0){
 
 			// there are some icons selected
-			console.log(" > " + icons_clicked + " total icon(s) selected...");
+			console.log(" > " + icons_clicked.length + " total icon(s) selected...");
 			$("body").addClass("icons-selected");
 
 			// update panel tab text TODO: there's gotta be a better/faster way
@@ -466,6 +573,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("// end updateIcon");
 	}
 
+	// Called by loadLocationTemplates() and by updateIcon()
 	Spreedia.sortStores = function(){
 		console.log("sortStores:");
 		// var pricerank = [1, 5, 8, 10, 2, 3, 4, 6, 7, 9]; // lowest low end, e.g. $-$$$$ comes before $$
@@ -475,7 +583,8 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// check for visible stores to sort
 		console.log(" > checking for stores to sort...");
-		var visiblestores = $(".store").filter(":visible");
+		// TODO: store visiblestores somewhere as a global/dom thang (updated after price range or icon changes)
+		var visiblestores = $(".store").filter(".matching.pricematch");
 		if (visiblestores.length > 0){
 			// there are visible stores to sort
 			$("#nomatches").hide();
@@ -565,13 +674,8 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		console.log("// end sortStores");
-
 	}
 
-	Spreedia.changeFormat = function(){
-		console.log("changeFormat:");
-
-		console.log("// end changeFormat");
-	}
+	
 
 }( window.Spreedia = window.Spreedia || {}, jQuery ));
