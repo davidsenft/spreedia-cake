@@ -23,7 +23,8 @@ class LocationsController extends AppController {
 	/* ******************************************************************** */
 	
 	public function view($id = false, $format = 'list'){
-		// TODO: if id is false, show user's location
+		// TODO: format for list, map no longer needed? but js is still needed? or use .js instead of /js? but that's not cacheing correctly. damn.
+		// TODO: if id is false, just use user's location? necessary?
 
 		// load location if it exists
 		$this->Location->id = $id;
@@ -33,14 +34,14 @@ class LocationsController extends AppController {
 
 		// set metas and page header stuff
 		$page = array(
-			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove?
+			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
 			'title' => $loc['Location']['name'],
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format
 		);
 
 		// format as list, map, or external js
-		$this->formatView($loc, $format, $page);
+		$this->formatView($loc, $page, $format);
 	}
 
 	public function near($lat, $lng, $dist, $format){
@@ -53,15 +54,17 @@ class LocationsController extends AppController {
 	/* PRIVATE HELPERS */
 	/* ******************************************************************** */
 
-	private function formatView($loc, $format, $page){
+	private function formatView($loc, $page, $format){
 		if ($format == 'js'){
-			// initial external js data load (cached)
+			// initial external js data load (cacheable as html)
 			$this->RequestHandler->renderAs($this, 'js');
-			$this->dataForView($loc, $format, $page);
+			$this->setDataForView($loc, $page);
 
 		}else if ($this->RequestHandler->responseType() == 'json'){
 			// subsequent ajax json requests (not cached)
-			$this->dataForView($loc, $format, $page);
+			// TODO: would be faaaannnnntastic if these could be cached 
+			// (would also make /js url and $format unnecessary)
+			$this->setDataForView($loc, $page);
 
 		}else{
 			$this->layout = 'basic';
@@ -70,7 +73,7 @@ class LocationsController extends AppController {
 	}
 
 	private function getContained($id){
-		// TODO: move this to Location model?
+		// TODO: move this to Location model somehow?
 		// recursion/containment (allows only 3 nested locations)
 		$this->Location->recursive = 2;
 		$this->Location->contain(array(
@@ -93,7 +96,9 @@ class LocationsController extends AppController {
 		return $loc;
 	}
 
-	private function dataForView($loc, $format, $page){
+	private function setDataForView($loc, $page){
+
+		// TODO: Allllllll of this shit should be moved to the Location Model
 
 		$id = $loc['Location']['id'];
 
@@ -145,7 +150,7 @@ class LocationsController extends AppController {
 					$iconkey = $iconkeys[$sni['id']];
 					$icons[$iconkey]['Stores'][] = $sn['Storename']['id']; // storeinstanceid instead?
 				}
-				// add local activity, if any
+				// TODO: add local activity, if any
 				// debug($sn);
 			}
 			$superstorenames[] = $ssn;
