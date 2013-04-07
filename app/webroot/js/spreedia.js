@@ -208,6 +208,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				var clickedstore = $("this").parents(".heart").attr("data-storename");
 				var status = $("this").hasClass("clicked");
 				Spreedia.syncHeart(id, clickedstore, status);
+				Spreedia.syncHeart(this);
 			});
 
 		}else{
@@ -281,9 +282,23 @@ function haversine(lat1,lng1,lat2,lng2){
 		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
 	}
 
-	Spreedia.syncHeart = function(id, storename, status){
-		// TODO: this
-		console.log("TODO: syncing heart...");
+	Spreedia.syncHeart = function(heartable){
+		// TODO: add or remove ss-id to/from the .heartable
+		var action = !$(heartable).hasClass("clicked") ? "add" : "delete"; // TODO: right now this is getting called before other click callback... must control for this! or use ss-id instead?
+		var model = "savedstore";
+
+		switch (action){
+			case "add":
+				var user_id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
+				var storename_id = $(heartable).parents(".store").attr("data-storename");
+				var callback = function(data){
+					// success callback TODO: indicate sync
+				break;
+
+				break;
+		
+		var url = "/" + model + "s/" + action + ".json";
+		$.post(url, post_data, callback);
 	}
 
 	Spreedia.address = function(){

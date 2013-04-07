@@ -128,4 +128,9 @@ class AppController extends Controller {
         return true;
     }
 
+    public function respond($response){
+    	$this->set('response', $response);
+		$this->set('_serialize', 'response');
+    }
+
 }

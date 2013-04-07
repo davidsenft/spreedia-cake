@@ -39,6 +39,7 @@ class UsersController extends AppController {
     public function login(){
         if ($this->request->is('post')) {
             if ($this->Auth->login()) {
+                $this->redirect($this->Auth->redirect());
                 $this->Session->setFlash(__('You have been logged in!'));
             } else {
                 $this->Session->setFlash(__('Invalid username or password, try again'));
@@ -67,6 +68,15 @@ class UsersController extends AppController {
         $this->set('user', $user);
         $this->set('_serialize', array('user'));
     }
+
+    /* TODO: this maybe should be createHeart() or deleteHeart()
+
+    public function syncHeart($id, $storeid, $status){
+        $this->layout = 'ajax';
+
+        $this->User->read(null, $id);
+        debug($this->User);
+    } */
 
 
 }
