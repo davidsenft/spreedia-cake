@@ -25,12 +25,12 @@ class LocationsController extends AppController {
 	public function view($id = false, $format = 'list'){
 		// TODO: format for list, map no longer needed? but js is still needed? or use .js instead of /js? but that's not cacheing correctly. damn.
 		// TODO: if id is false, just use user's location? necessary?
-
+ 
 		// load location if it exists
 		$this->Location->id = $id;
 		if ($id != false && (!$this->Location->exists() || !$this->Location->isActive()))
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
-		$loc = $this->getContained($id);
+		$loc = $this->Location->getContained();
 
 		// set metas and page header stuff
 		$page = array(
@@ -57,6 +57,8 @@ class LocationsController extends AppController {
 	private function formatView($loc, $page, $format){
 		if ($format == 'js'){
 			// initial external js data load (cacheable as html)
+			// TODO: would be nice if cached version were also served as js... .htaccess thing?
+			// TODO: make sure serving cached version as html works ok in various browsers
 			$this->RequestHandler->renderAs($this, 'js');
 			$this->setDataForView($loc, $page);
 
@@ -72,38 +74,12 @@ class LocationsController extends AppController {
 		}
 	}
 
-	private function getContained($id){
-		// TODO: move this to Location model somehow?
-		// recursion/containment (allows only 3 nested locations)
-		$this->Location->recursive = 2;
-		$this->Location->contain(array(
-
-			'Parent.Parent',
-			'Parent.Parent.Parent',
-			'Child',
-			'Child.Child',
-			'Storeinstance',
-			'Child.Storeinstance',
-			'Child.Child.Storeinstance'
-
-			// 'Storeinstance.Storename',
-			// 'Child.Storeinstance.Storename',
-			// 'Child.Child.Storeinstance.Storename'
-		));
-		
-		// location info
-		$loc = $this->Location->read(null, $id);
-		return $loc;
-	}
-
 	private function setDataForView($loc, $page){
+		// TODO: move any of this to any Models?
 
-		// TODO: Allllllll of this shit should be moved to the Location Model
-
-		$id = $loc['Location']['id'];
-
-		// get extended location info
-		$location = $this->Location->extendLocation($loc); // TODO: some way to do this without passing loc?
+		// get extended location info 
+		// TODO: some way to do this without passing loc?
+		$location = $this->Location->extendLocation($loc); 
 		
 		// children info
 		$child = $loc['Child'];
@@ -138,7 +114,7 @@ class LocationsController extends AppController {
 			$ssn['Localinstance'] = array();
 			foreach ($sn['Storeinstance'] as $si){
 				// determine if store instance is local
-				if ($si['location_id'] == $id){
+				if ($si['location_id'] == $location['id']){
 					$si['locationName'] = $location['name'];
 					$ssn['Localinstance'][] = $si;
 				}else if(array_key_exists($si['location_id'], $children)){
@@ -146,23 +122,24 @@ class LocationsController extends AppController {
 					$ssn['Localinstance'][] = $si;
 				}else break;
 				// save local store in icon array
-				foreach ($sn['Icon'] as $sni){ // todo: do this process only once per sn?
+				foreach ($sn['Icon'] as $sni){ // TODO: do this process only once per sn?
 					$iconkey = $iconkeys[$sni['id']];
 					$icons[$iconkey]['Stores'][] = $sn['Storename']['id']; // storeinstanceid instead?
 				}
 				// TODO: add local activity, if any
-				// debug($sn);
 			}
 			$superstorenames[] = $ssn;
 		}
 
-		// activity ORRRRR ONLY DO THIS CLIENT SIDE?
+		// activity TODO: ORRRRR ONLY DO THIS CLIENT SIDE?
 		$Activestorename = ClassRegistry::init('Activestorename');
-		$activestorenames = $Activestorename->find("all", array(
-			'conditions' => array('Activestorename.storename_id' => $storenameids)));
+		// $activestorenames = $Activestorename->find("all", array(
+		// 	'conditions' => array('Activestorename.storename_id' => $storenameids)));
+		$activestorenames = $Activestorename->findAllByStorenameId($storenameids);
 		$Activestoreinstance = ClassRegistry::init('Activestoreinstance');
-		$activestoreinstances = $Activestoreinstance->find("all", array(
-			'conditions' => array('Activestoreinstance.storeinstance_id' => $storeinstanceids)));
+		// $activestoreinstances = $Activestoreinstance->find("all", array(
+		// 	'conditions' => array('Activestoreinstance.storeinstance_id' => $storeinstanceids)));
+		$activestoreinstances = $Activestoreinstance->findAllByStoreinstanceId($storeinstanceids);
 
 		// prices <-> priceranges TODO: MAYBE NOT NECESSARY? JUST HARD CODE THESE?
 		$Price = ClassRegistry::init('Price');

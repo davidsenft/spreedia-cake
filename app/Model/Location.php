@@ -55,5 +55,23 @@ class Location extends AppModel {
 	public function recursiveChildren($child){
 		return getChildrenRecursive($child); // in bootstrap.php
 	}
+
+	public function getContained(){
+		// TODO: can this just be done by the Model class itself, without a function?
+		$this->recursive = 2;
+		$this->contain(array(
+			'Parent.Parent',
+			'Parent.Parent.Parent',
+			'Child',
+			'Child.Child',
+			'Storeinstance',
+			'Child.Storeinstance',
+			'Child.Child.Storeinstance'
+			// 'Storeinstance.Storename',
+			// 'Child.Storeinstance.Storename',
+			// 'Child.Child.Storeinstance.Storename'
+		));
+		return $this->read();
+	}
     
 }
