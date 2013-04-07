@@ -7,7 +7,7 @@
 		console.log("initializing the map...");
 
 		// TODO: throw exception if this hasn't been set?
-		var stores = Spreedia.result["stores"];
+		var stores = Spreedia.context["stores"];
 
 		// map style
 		var spreediaStyle = [
