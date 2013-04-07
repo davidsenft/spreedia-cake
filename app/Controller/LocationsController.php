@@ -97,6 +97,7 @@ class LocationsController extends AppController {
 			$icons[$key]['Stores'] = array();}
 
 		// store and activity info
+		// TODO: can we bypass some of this faster if location has no children?
 		$Storename = ClassRegistry::init('Storename');
 		$storeinstances = getStoreInstancesRecursive($loc);
 		$storenameids = array();
@@ -110,24 +111,35 @@ class LocationsController extends AppController {
 		$superstorenames = array();
 		// $activity = array();
 		foreach ($storenames as $sn){
+
+			// $sn is a storename with at least one local instance
+			// $ssn will additionally tells us which one(s) it is
 			$ssn = $sn;
 			$ssn['Localinstance'] = array();
 			foreach ($sn['Storeinstance'] as $si){
+
 				// determine if store instance is local
 				if ($si['location_id'] == $location['id']){
 					$si['locationName'] = $location['name'];
-					$ssn['Localinstance'][] = $si;
+					$islocal = true;
 				}else if(array_key_exists($si['location_id'], $children)){
 					$si['locationName'] = $children[$si['location_id']]['name'];
+					$islocal = true;
+				}else $islocal = false;
+
+				if ($islocal){
+					// store instance is local, so add it to the list of local instances
 					$ssn['Localinstance'][] = $si;
-				}else break;
-				// save local store in icon array
-				foreach ($sn['Icon'] as $sni){ // TODO: do this process only once per sn?
-					$iconkey = $iconkeys[$sni['id']];
-					$icons[$iconkey]['Stores'][] = $sn['Storename']['id']; // storeinstanceid instead?
+					// TODO: add activity, if any, to list of local activity
 				}
-				// TODO: add local activity, if any
 			}
+
+			// save storename in local icon array
+			foreach ($sn['Icon'] as $sni){
+				$iconkey = $iconkeys[$sni['id']];
+				$icons[$iconkey]['Stores'][] = $sn['Storename']['id'];
+			}
+
 			$superstorenames[] = $ssn;
 		}
 
