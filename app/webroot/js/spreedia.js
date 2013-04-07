@@ -48,10 +48,10 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	// Runs only once on page load, calls the appropriate data type init
 	Spreedia.init = function(){
+
 		// this is just a hack right now
 		// call the appropriate data type init
 		// get user info?
-
 		$.post("/users/view/7.json", function(data){
 			console.log("loading user info...")
 			Spreedia.user = data['user'];
@@ -60,6 +60,16 @@ function haversine(lat1,lng1,lat2,lng2){
 			// user info has been loaded, now get location
 			// TODO: allow for other way around?
 			Spreedia.initLocation();
+		});
+
+		// white gradient at the top when scrolling
+		$(window).scroll(function () {
+			var offset = Spreedia.getScrollOffset();
+			if (offset > 0){
+				$("body").addClass("offset");
+			}else{
+				$("body").removeClass("offset");
+			}
 		});
 
 	}
@@ -110,6 +120,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.initLocation = function(){
 		// TODO: delay map script load on initial pageload if starting in list view?
 		Spreedia.loadLocationData();
+
 	}
 
 	Spreedia.initFavorites = function(){
@@ -212,17 +223,6 @@ function haversine(lat1,lng1,lat2,lng2){
 		$("#format").on("click", "li", function(){
 			Spreedia.format($(this).attr("data-activate"));
 		});
-
-		// white gradient at the top when scrolling
-		// TODO: this doesn't go here
-		$(window).scroll(function () {
-			var offset = Spreedia.getScrollOffset();
-			if (offset > 0){
-				$("body").addClass("offset");
-			}else{
-				$("body").removeClass("offset");
-			}
-		});
 	}
 
 	// Called by loadLocationData()
@@ -250,21 +250,6 @@ function haversine(lat1,lng1,lat2,lng2){
 				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked").attr('data-ssid', id);
 			}
 
-			// listen for new hearts
-			// TODO: convert to .on()
-			$(".heartable").click(function(){
-				Spreedia.syncHeart(this);
-			});
-
-		}else{
-
-			// force registration for new hearts
-			// TODO: convert to .on()
-			// and move to THE click listener!!
-			$(".heartable").click(function(){
-				// TODO: force registration while remembering the choice
-				console.log("TODO: forcing registration...");
-			});
 		}
 
 		// update user location
@@ -287,13 +272,17 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.addListeners = function(){
 		console.log("adding listeners to loaded templates...");
 
-		// anything with .click class
-		$(".click").click(function(){
+		// .click listener
+		$("body").on("click", ".click", function(){
 			$(this).toggleClass("clicked");
 
-			// these depend on 'clicked' being set first, so they have to go here
-			// TODO: move to loadPanel by making it not dependent on .clicked
-			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
+		// these depend on 'clicked' being set first, so they have to go here
+		}).on("click", "button.icon", function(){
+			Spreedia.updateIcon($(this).attr("data-id"));
+
+		}).on("click", ".heartable", function(){
+			Spreedia.syncHeart(this);
+
 		});
 
 		// anything with .hover class gets .over class on hover
@@ -311,8 +300,15 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	Spreedia.syncHeart = function(heartable){
+
+		if (!Spreedia.user){
+			console.log("TODO: force user registration");
+			return false;
+		}
+
 		// TODO: add or remove ss-id to/from the .heartable
-		var action = !$(heartable).hasClass("clicked") ? "add" : "delete"; // TODO: right now this is getting called before other click callback... must control for this! or use ss-id instead?
+		// NOTE: this depends on clicked already being updated!
+		var action = $(heartable).hasClass("clicked") ? "add" : "delete"; 
 		var model = "savedstore";
 
 		switch (action){
