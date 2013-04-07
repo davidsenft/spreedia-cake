@@ -152,25 +152,22 @@ function haversine(lat1,lng1,lat2,lng2){
 	// Called by loadStoreinstanceData()
 	Spreedia.loadSingleStoreTemplates = function(){
 		console.log("loadSingleStoreTemplates:");
-		r = Spreedia.context;
 
-		// 
-		Spreedia.handle("top", {"page" : r["page"]});
-
+		// load handlebars templates
+		Spreedia.handle("top");
 
 
+		// ... 
 
 	}
 
 	// Called by loadLocationData()
 	Spreedia.loadManyStoresTemplates = function(){
 		console.log("loadManyStoresTemplates:");
-		r = Spreedia.context;
-		// TODO: is it faster to break it up like this, or just pass result to all templates?
-		console.time('loadManyStores handles');
+
+		// load handlebars templates
 		Spreedia.handle("panel");
 		Spreedia.handle("top");
-		console.timeEnd('loadManyStores handles');
 
 		// pricerange filter slider
 		var range = $("#slider-pricerange");
@@ -198,9 +195,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.loadLocationTemplates = function(){
 		console.log("loadLocationTemplates:");
 
-		r = Spreedia.context;
-		// TODO: don't need location template at all no how?
-		// Spreedia.handle("location");
+		// TODO: Spreedia.handle("location");??
 		// TODO: don't load storelist if in map mode? or do?
 		Spreedia.handle("storelist");
 
@@ -222,8 +217,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		// user preferences
-		// TODO: somehow get just user prefs related to this one location?
-		// TODO: otherwise this is going ot get SLOW!!! (i think?)
+		// TODO: somehow get just user prefs related to this one location? b/c otherwise this is going ot get SLOW!!! (i think?)
 		if (Spreedia.user){
 
 			// show existing hearts
