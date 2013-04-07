@@ -286,8 +286,20 @@ class CacheHelper extends AppHelper {
 		if (empty($cache)) {
 			return;
 		}
-		$cache = $cache . '.php';
-		$file = '<!--cachetime:' . $cacheTime . '--><?php';
+
+		// SPREEDIA EDIT!!!!
+		if (strpos($cache, "_js") > 0){
+			$cache = $cache . '.php';
+			$file = '<?php header(\'Content-Type: text/javascript; charset=UTF-8\'); ?>';
+			$file .= '<!--cachetime:' . $cacheTime . '--><?php';
+		}else{
+			$cache = $cache . '.php';
+			$file = '<!--cachetime:' . $cacheTime . '--><?php';
+		}
+
+		// WAS:
+		// $cache = $cache . '.php';
+		// $file = '<!--cachetime:' . $cacheTime . '--><?php';
 
 		if (empty($this->_View->plugin)) {
 			$file .= "
@@ -300,7 +312,28 @@ class CacheHelper extends AppHelper {
 			";
 		}
 
+		// ANOTHER SPREEDIA EDIT!!!!
 		$file .= '
+				$request = unserialize(base64_decode(\'' . base64_encode(serialize($this->request)) . '\'));
+				$response = new CakeResponse(array("charset" => Configure::read("App.encoding")';
+		
+		if (strpos($cache, "_js") > 0){
+			$file .= ', "type" => "js"';
+		}
+
+		$file .= '));
+				$controller = new ' . $this->_View->name . 'Controller($request, $response);
+				$controller->plugin = $this->plugin = \'' . $this->_View->plugin . '\';
+				$controller->helpers = $this->helpers = unserialize(base64_decode(\'' . base64_encode(serialize($this->_View->helpers)) . '\'));
+				$controller->layout = $this->layout = \'' . $this->_View->layout . '\';
+				$controller->theme = $this->theme = \'' . $this->_View->theme . '\';
+				$controller->viewVars = unserialize(base64_decode(\'' . base64_encode(serialize($this->_View->viewVars)) . '\'));
+				Router::setRequestInfo($controller->request);
+				$this->request = $request;';
+
+
+		// WAS:
+		/* $file .= '
 				$request = unserialize(base64_decode(\'' . base64_encode(serialize($this->request)) . '\'));
 				$response = new CakeResponse(array("charset" => Configure::read("App.encoding")));
 				$controller = new ' . $this->_View->name . 'Controller($request, $response);
@@ -310,7 +343,9 @@ class CacheHelper extends AppHelper {
 				$controller->theme = $this->theme = \'' . $this->_View->theme . '\';
 				$controller->viewVars = unserialize(base64_decode(\'' . base64_encode(serialize($this->_View->viewVars)) . '\'));
 				Router::setRequestInfo($controller->request);
-				$this->request = $request;';
+				$this->request = $request;'; */
+
+
 
 		if ($useCallbacks == true) {
 			$file .= '
