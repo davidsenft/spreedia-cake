@@ -90,11 +90,12 @@ class LocationsController extends AppController {
 		// $this->set('parent', $parent);
 
 		// icon info
+		// TODO: load this in some initial page load, rather than with location?
 		$Icon = ClassRegistry::init('Icon');
 		$icons = $Icon->find("all");
-		$iconkeys = array_flip(array_map(function($i){return $i['Icon']['id'];},$icons));
+		/* $iconkeys = array_flip(array_map(function($i){return $i['Icon']['id'];},$icons));
 		foreach ($icons as $key=>$val){
-			$icons[$key]['Stores'] = array();}
+			$icons[$key]['Stores'] = array();} */
 
 		// store and activity info
 		// TODO: can we bypass some of this faster if location has no children?
@@ -135,10 +136,10 @@ class LocationsController extends AppController {
 			}
 
 			// save storename in local icon array
-			foreach ($sn['Icon'] as $sni){
+			/* foreach ($sn['Icon'] as $sni){
 				$iconkey = $iconkeys[$sni['id']];
 				$icons[$iconkey]['Stores'][] = $sn['Storename']['id'];
-			}
+			} */
 
 			$superstorenames[] = $ssn;
 		}
