@@ -38,7 +38,6 @@ echo $this->Html->css('spreedia');
 <!-- ******************************************************************** -->
 <?php
 	// session/auth error messages
-  // debug($user);
 	/* echo $this->Session->flash();
   echo $this->Session->flash('auth'); */
 ?>

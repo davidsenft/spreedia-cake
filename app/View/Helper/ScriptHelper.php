@@ -13,6 +13,8 @@ class ScriptHelper extends AppHelper {
 
 	public function loadAll($format){ 
 
+		// TODO: right now we're using this for all pages... split according to all/manystores/onestore/etc.?
+
 		?>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript">

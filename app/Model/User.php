@@ -45,10 +45,4 @@ class User extends AppModel {
 	    return true;
 	}
 
-	public function index(){
-		
-	}
-
-
-
 }
