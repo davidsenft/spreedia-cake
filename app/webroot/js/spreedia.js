@@ -68,9 +68,9 @@ function haversine(lat1,lng1,lat2,lng2){
 		// call the appropriate data type init TODO: or just call data load?
 	}
 
-	Spreedia.changeFormat = function(format){
-		// TODO: maybe change this to setFormat? call from init() or init_stores()?
-		console.log("changeFormat: " + format);
+	// Called by loadLocationData or a user click
+	Spreedia.format = function(format){
+		console.log("format: " + format);
 
 		// hide current content view
 		$(".content_view").hide();
@@ -94,9 +94,11 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		}
 
-		Spreedia.activateFormat();
-
-		console.log("// end changeFormat");
+		// TODO: if this is only being used by #format li, simplify
+		console.log(" > activating...");
+		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
+	
+		console.log("// end format");
 	}
 
 	/*********************************************************** 
@@ -118,7 +120,9 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	/*********************************************************** 
 	 * DATA LOADS 
-	 * These are called by data type init or by user action
+	 * These should be called after Spreedia.context has changed
+	 *   (either by Data Type Init or by user action)
+	 * They load the appropriate templates, add listeners, and set format
 	 ***********************************************************/
 
 	// Called after Spreedia.context has been changed
@@ -130,14 +134,19 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.loadTop();
 		Spreedia.loadStores();
 
+		// TODO: combine these into one?
 		// add general listeners to loaded templates
 		Spreedia.addListeners();
 
-		// "map" format pages only TODO: rethink?
-		if ($("body").attr("data-format") == "map"){
-			Spreedia.initializeMap();
-		}
+		// determine and activate format
+		// TODO: does this need to go after templates are loaded?
+		Spreedia.format($("body").attr("data-format"));
 	}
+
+	/*********************************************************** 
+	 * AJAX DATA LOADS
+	 * These fetch json data, set Spreedia.context, and call a Data Load
+	 ***********************************************************/
 
 	Spreedia.loadLocationDataById = function(id){
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
@@ -147,7 +156,8 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	/*********************************************************** 
-	 * TEMPLATES
+	 * TEMPLATE LOADS
+	 * These load a handlebars template and add appropriate listeners
 	 ***********************************************************/
 
 	// Called by loadStoreinstanceData()
@@ -175,9 +185,8 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// page format
 		$("#format li").click(function(){
-			Spreedia.changeFormat($(this).attr("data-activate"));
+			Spreedia.format($(this).attr("data-activate"));
 		});
-		Spreedia.activateFormat();
 
 		// white gradient at the top when scrolling
 		// TODO: this doesn't go here
@@ -264,11 +273,12 @@ function haversine(lat1,lng1,lat2,lng2){
 	// Called by loadLocationData() after templates have been loaded
 	Spreedia.addListeners = function(){
 		console.log("adding listeners to loaded templates...");
-		// TODO: move these event listeners to another function that can be called after ajax loads?
 
 		// anything with .click class
 		$(".click").click(function(){
 			$(this).toggleClass("clicked");
+
+			// these depend on 'clicked' being set first, so they have to go here
 			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
 		});
 
@@ -284,12 +294,6 @@ function haversine(lat1,lng1,lat2,lng2){
 		$("#paneltabs dd a").click(function(){
 			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
 		});
-	}
-
-	// Called by addListeners() and by changeFormat()
-	Spreedia.activateFormat = function(){
-		console.log("activating format...");
-		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
 	}
 
 	Spreedia.syncHeart = function(heartable){
