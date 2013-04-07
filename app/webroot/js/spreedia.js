@@ -29,7 +29,7 @@ function haversine(lat1,lng1,lat2,lng2){
 ;(function( Spreedia, $, undefined ) {
 
 	// current app data
-	Spreedia.result = false; // TODO: this should just be manystores data... something else for a single store?
+	Spreedia.context = false;
 	Spreedia.matchingstores = 0;
 
 	// user MAJOR TODO!!!!!!!!!!!!!!!!
@@ -82,7 +82,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				$("body").removeClass("map").addClass("list").attr("data-format", "list");
 				$("#list").show();
 				// TODO: only load storelist if it hasn't been loaded, or always load it?
-				// Spreedia.loadLocationData(Spreedia.result);
+				// Spreedia.loadLocationData(Spreedia.context);
 				break;
 
 			case "map":
@@ -121,7 +121,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	 * These are called by data type init or by user action
 	 ***********************************************************/
 
-	// Called after Spreedia.result has been changed
+	// Called after Spreedia.context has been changed
 	Spreedia.loadLocationData = function(){
 		console.log("loadLocationData:");
 
@@ -140,7 +140,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	Spreedia.loadLocationDataById = function(id){
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
-			Spreedia.result = result;
+			Spreedia.context = result;
 			Spreedia.loadLocationData();
 		});
 	}
@@ -152,9 +152,9 @@ function haversine(lat1,lng1,lat2,lng2){
 	// Called by loadStoreinstanceData()
 	Spreedia.loadSingleStoreTemplates = function(){
 		console.log("loadSingleStoreTemplates:");
-		r = Spreedia.result;
+		r = Spreedia.context;
 
-		//
+		// 
 		Spreedia.handle("top", {"page" : r["page"]});
 
 
@@ -165,11 +165,11 @@ function haversine(lat1,lng1,lat2,lng2){
 	// Called by loadLocationData()
 	Spreedia.loadManyStoresTemplates = function(){
 		console.log("loadManyStoresTemplates:");
-		r = Spreedia.result;
+		r = Spreedia.context;
 		// TODO: is it faster to break it up like this, or just pass result to all templates?
 		console.time('loadManyStores handles');
-		Spreedia.handle("panel", {"icons" : r["icons"], "prices" : r["prices"]});
-		Spreedia.handle("top", {"page" : r["page"]});
+		Spreedia.handle("panel");
+		Spreedia.handle("top");
 		console.timeEnd('loadManyStores handles');
 
 		// pricerange filter slider
@@ -198,11 +198,11 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.loadLocationTemplates = function(){
 		console.log("loadLocationTemplates:");
 
-		r = Spreedia.result;
+		r = Spreedia.context;
 		// TODO: don't need location template at all no how?
-		Spreedia.handle("location", r["location"]);
+		// Spreedia.handle("location");
 		// TODO: don't load storelist if in map mode? or do?
-		Spreedia.handle("storelist", {"stores" : r["stores"]});
+		Spreedia.handle("storelist");
 
 		// TODO: rethink how all this works if list and map are the same?
 		if ($("body").attr("data-format") == "list"){
@@ -256,10 +256,10 @@ function haversine(lat1,lng1,lat2,lng2){
 		// Spreedia.updateDistances();
 	}
 
-	Spreedia.handle = function(name, context){
+	Spreedia.handle = function(name){
 		console.log(" > loading '" + name + "' template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
-		var html = template(context);
+		var html = template(Spreedia.context);
 		$("#hb_" + name).html(html);
 	}
 
