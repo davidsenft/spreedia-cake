@@ -129,10 +129,13 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.loadLocationData = function(){
 		console.log("loadLocationData:");
 
+		console.time('loadLocationData');
+
 		// load templates
-		Spreedia.loadPanel();
+		
 		Spreedia.loadTop();
 		Spreedia.loadStores();
+		Spreedia.loadPanel();
 
 		// TODO: combine these into one?
 		// add general listeners to loaded templates
@@ -141,6 +144,8 @@ function haversine(lat1,lng1,lat2,lng2){
 		// determine and activate format
 		// TODO: does this need to go after templates are loaded?
 		Spreedia.format($("body").attr("data-format"));
+
+		console.timeEnd('loadLocationData');
 	}
 
 	/*********************************************************** 
@@ -166,7 +171,11 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	}
 
-	// Called by loadLocationData()
+	// Called by loadLocationData() AFTER loadStores()
+	// TODO: right now this is in a weird tweener place, because we aren't actually changing anything about
+	// the panel based on location's json, so we don't need to load it with new location data, we can just
+	// load it once... if we decide to do all icon<->store processing in js, for example, then we should
+	// get rid of loadPanel or at least not call it every single time we do a new data load
 	Spreedia.loadPanel = function(){
 		// handlebars template
 		Spreedia.handle("panel");
@@ -175,7 +184,23 @@ function haversine(lat1,lng1,lat2,lng2){
 		var range = $("#slider-pricerange");
 		function slidefunc(event, ui){Spreedia.updatePrice(ui.values[0], ui.values[1]);}
 		range.slider({range: true, min: 1, max: 4, values: [ 1, 4 ], slide: slidefunc});
-		// NOTE: moved updatePrice from here
+		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
+
+		// sorting
+		console.log(" > sorting...");
+		Spreedia.sortStores();
+		$("#sortby").change(function(){
+			Spreedia.sortStores();
+		});
+
+		// icons
+		console.time('icons');
+		$("#iconspanel button.icon").each(function(){
+			var icon_id = $(this).attr("data-id");
+			var count = $(".store .icon").filter("[data-icon='"+icon_id+"']").length;
+			if (count == 0) $(this).hide(); // TODO: hide or make unclickable?
+		})
+		console.timeEnd('icons');
 	}
 
 	// Called by loadLocationData()
@@ -184,7 +209,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.handle("top");
 
 		// page format
-		$("#format li").click(function(){
+		$("#format").on("click", "li", function(){
 			Spreedia.format($(this).attr("data-activate"));
 		});
 
@@ -206,22 +231,11 @@ function haversine(lat1,lng1,lat2,lng2){
 		// TODO: don't load storelist if in map mode? or do? huh?
 		Spreedia.handle("storelist");
 
-		// TODO: rethink how all this works if list and map are the same?
-		// if ($("body").attr("data-format") == "list"){
-
-			// expanding TODO: are we still doing this?
-			// TODO: do this only for lists?
-			$(".expandable-for-verysmall").click(function(){
-				$(this).toggleClass("expanded");
-			});
-
-			// sorting
-			console.log(" > sorting...");
-			Spreedia.sortStores();
-			$("#sortby").change(function(){
-				Spreedia.sortStores();
-			});
-		// }
+		// expanding TODO: are we still doing this?
+		// TODO: do this only for lists?
+		$(".expandable-for-verysmall").click(function(){
+			$(this).toggleClass("expanded");
+		});
 
 		// user preferences
 		// TODO: somehow get just user prefs related to this one location? b/c otherwise this is going ot get SLOW!!! (i think?)
@@ -237,6 +251,7 @@ function haversine(lat1,lng1,lat2,lng2){
 			}
 
 			// listen for new hearts
+			// TODO: convert to .on()
 			$(".heartable").click(function(){
 				Spreedia.syncHeart(this);
 			});
@@ -244,15 +259,13 @@ function haversine(lat1,lng1,lat2,lng2){
 		}else{
 
 			// force registration for new hearts
+			// TODO: convert to .on()
+			// and move to THE click listener!!
 			$(".heartable").click(function(){
 				// TODO: force registration while remembering the choice
 				console.log("TODO: forcing registration...");
 			});
 		}
-
-		// update price TODO: this maybe doesn't go here neither no-how?
-		var range = $("#slider-pricerange");
-		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
 
 		// update user location
 		// Spreedia.updateDistances();
@@ -279,6 +292,7 @@ function haversine(lat1,lng1,lat2,lng2){
 			$(this).toggleClass("clicked");
 
 			// these depend on 'clicked' being set first, so they have to go here
+			// TODO: move to loadPanel by making it not dependent on .clicked
 			if ($(this).is("button.icon")) Spreedia.updateIcon($(this).attr("data-id"));
 		});
 
