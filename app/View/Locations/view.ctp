@@ -59,16 +59,7 @@ $this->Handlebars->template('panel'); ?>
 <script type="text/javascript">
 
 $(document).ready(function(){
-	// initial data load (external js)
-	Spreedia.result = result; // TODO: make this Spreedia.load(result) ??
-	Spreedia.loadLocationData(); 
-
-	/* $('#bigredbutton').click(function(){
-		// ajax data load (json)
-		Spreedia.loadLocationDataById(15);
-	}); */
-
-	// alert(Spreedia.address());
+	Spreedia.init();
 });
 
 </script>

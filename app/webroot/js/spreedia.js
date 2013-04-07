@@ -1,5 +1,6 @@
 // dump(obj) to debug
 function dump(obj){var out='';for(var i in obj){out+=i+": "+obj[i]+"\n";}alert(out);}
+function logg(obj){var out='';for(var i in obj){out+=" > "+i+": "+obj[i]+"\n";}return out;}
 
 // jQuery.fn.sortElements (minified on 10/31/12)
 jQuery.fn.sortElements=(function(){var a=[].sort;return function(b,c){c=c||function(){return this};var d=this.map(function(){var a=c.call(this),b=a.parentNode,d=b.insertBefore(document.createTextNode(""),a.nextSibling);return function(){if(b===this){throw new Error("Descendant sort error.")}b.insertBefore(this,d);b.removeChild(d)}});return a.call(this,b).each(function(a){d[a].call(c.call(this))})}})();
@@ -28,12 +29,11 @@ function haversine(lat1,lng1,lat2,lng2){
 ;(function( Spreedia, $, undefined ) {
 
 	// current app data
-	Spreedia.result = false;
+	Spreedia.result = false; // TODO: this should just be manystores data... something else for a single store?
 	Spreedia.matchingstores = 0;
 
-	// user
+	// user MAJOR TODO!!!!!!!!!!!!!!!!
 	Spreedia.user = false;
-	Spreedia.user = {"User":{"id":"7","username":"sheep","handle":"iamsheep"},"Savedstore":[{"id":"1","user_id":"7","storename_id":"100"}],"Managedstore":[{"id":"1","user_id":"7","storename_id":"110"}]};
 
 	// store geolocation permissions (so firefox doesn't keep asking)
 	Spreedia.askedPermission = false;
@@ -46,13 +46,26 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.metricfactors = new Array(1, 1000);
 	Spreedia.metricunits = new Array("km", "m");
 
-	// Actually only happens once per page load
+	// Runs only once on page load, calls the appropriate data type init
 	Spreedia.init = function(){
+		// this is just a hack right now
 		// call the appropriate data type init
+		// get user info?
+
+		$.post("/users/view/7.json", function(data){
+			console.log("loading user info...")
+			Spreedia.user = data['user'];
+			console.log(Spreedia.user);
+
+			// user info has been loaded, now get location
+			// TODO: allow for other way around?
+			Spreedia.initLocation();
+		});
+
 	}
 
 	Spreedia.changeDataType = function(){
-		// call the appropriate data type init
+		// call the appropriate data type init TODO: or just call data load?
 	}
 
 	Spreedia.changeFormat = function(format){
@@ -89,10 +102,12 @@ function haversine(lat1,lng1,lat2,lng2){
 	/*********************************************************** 
 	 * DATA TYPE INITS 
 	 * These are called only by init() or by changeDataType()
+	 * TODO: are these necessary? Or can we just use Data loads?
 	 ***********************************************************/
 
 	Spreedia.initLocation = function(){
-
+		// TODO: delay map script load on initial pageload if starting in list view?
+		Spreedia.loadLocationData();
 	}
 
 	Spreedia.initFavorites = function(){
@@ -103,7 +118,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	/*********************************************************** 
 	 * DATA LOADS 
-	 * These are called only by data type init or by user action
+	 * These are called by data type init or by user action
 	 ***********************************************************/
 
 	// Called after Spreedia.result has been changed
@@ -134,19 +149,34 @@ function haversine(lat1,lng1,lat2,lng2){
 	 * TEMPLATES
 	 ***********************************************************/
 
+	// Called by loadStoreinstanceData()
+	Spreedia.loadSingleStoreTemplates = function(){
+		console.log("loadSingleStoreTemplates:");
+		r = Spreedia.result;
+
+		//
+		Spreedia.handle("top", {"page" : r["page"]});
+
+
+
+
+	}
+
+	// Called by loadLocationData()
 	Spreedia.loadManyStoresTemplates = function(){
 		console.log("loadManyStoresTemplates:");
 		r = Spreedia.result;
 		// TODO: is it faster to break it up like this, or just pass result to all templates?
+		console.time('loadManyStores handles');
 		Spreedia.handle("panel", {"icons" : r["icons"], "prices" : r["prices"]});
 		Spreedia.handle("top", {"page" : r["page"]});
+		console.timeEnd('loadManyStores handles');
 
 		// pricerange filter slider
 		var range = $("#slider-pricerange");
 		function slidefunc(event, ui){Spreedia.updatePrice(ui.values[0], ui.values[1]);}
 		range.slider({range: true, min: 1, max: 4, values: [ 1, 4 ], slide: slidefunc});
-		// TODO: this should not happen yet!!
-		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
+		// NOTE: moved updatePrice from here
 
 		// format listener
 		$("#format li").click(function(){
@@ -164,6 +194,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 	}
 
+	// Called by loadLocationData()
 	Spreedia.loadLocationTemplates = function(){
 		console.log("loadLocationTemplates:");
 
@@ -198,16 +229,13 @@ function haversine(lat1,lng1,lat2,lng2){
 			// show existing hearts
 			var savedstores = Spreedia.user['Savedstore'];
 			for (x in savedstores){
+				var id = savedstores[x]['id'];
 				var storename = savedstores[x]['storename_id'];
-				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked");
+				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked").attr('data-ssid', id);
 			}
 
 			// listen for new hearts
 			$(".heartable").click(function(){
-				var id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
-				var clickedstore = $("this").parents(".heart").attr("data-storename");
-				var status = $("this").hasClass("clicked");
-				Spreedia.syncHeart(id, clickedstore, status);
 				Spreedia.syncHeart(this);
 			});
 
@@ -220,8 +248,12 @@ function haversine(lat1,lng1,lat2,lng2){
 			});
 		}
 
+		// update price TODO: this maybe doesn't go here neither no-how?
+		var range = $("#slider-pricerange");
+		Spreedia.updatePrice(range.slider("values",0), range.slider("values",1));
+
 		// update user location
-		Spreedia.updateDistances();
+		// Spreedia.updateDistances();
 	}
 
 	Spreedia.handle = function(name, context){
@@ -232,12 +264,11 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	/*********************************************************** 
-	 * MISCELLANY / HELPERS
+	 * MISCELLANY / HELPERS / ONE-OFFS
 	 ***********************************************************/
-
-	// runs once templates have been loaded 
+ 
 	// TODO: better fn name? not all listeners
-	// TODO: DOES THIS HAPPEN ONCE PER DATA LOAD OR ONCE PER FORMAT LOAD?
+	// Called by loadLocationData() after templates have been loaded
 	Spreedia.addListeners = function(){
 		console.log("adding listeners to loaded templates...");
 		// TODO: move these event listeners to another function that can be called after ajax loads?
@@ -291,16 +322,30 @@ function haversine(lat1,lng1,lat2,lng2){
 			case "add":
 				var user_id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
 				var storename_id = $(heartable).parents(".store").attr("data-storename");
+				var post_data = {"user_id" : user_id, "storename_id" : storename_id};
 				var callback = function(data){
+					console.log("added " + model + " with id " + data);
+					$(heartable).attr("data-ssid", data);
 					// success callback TODO: indicate sync
+				};
 				break;
 
+			case "delete":
+				var ss_id = $(heartable).attr('data-ssid');
+				var post_data = {"id" : ss_id};
+				var callback = function(data){
+					console.log("deleted " + model + " with id " + data);
+					$(heartable).attr("data-ssid", "");
+					// success callback TODO: indicate sync
+				};
 				break;
+		}
 		
 		var url = "/" + model + "s/" + action + ".json";
 		$.post(url, post_data, callback);
 	}
 
+	// TODO: I think this is for use with history.js stuff...
 	Spreedia.address = function(){
         var loc = String(document.location);
         var idx = loc.indexOf('#');
@@ -332,7 +377,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		return "About " + d_rounded + " " + d_unit;
 	}
 
-	// only called from updateDistances if position is supported by browser
+	// Called by updateDistances() only if position is supported by browser
 	Spreedia.setDistancesFromPos = function(position){
 		console.log("setDistancesFromPos:");
 		
@@ -418,6 +463,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	    return y;
 	}	
 
+	// Called by sortStores() and NO LONGER BY loadLocationTemplates()
 	Spreedia.updateDistances = function(){
 		console.log("updateDistances:");
 
@@ -438,7 +484,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				msg = "An unknown error occurred."
 				break;
 			}
-			console.log(" > GEOLOCATION ERROR: " + msg);
+			console.log("GEOLOCATION ERROR: " + msg);
 			console.log(" > disabling location-based sorting...");
 			$("#sortby option[value='location']").prop('disabled', true);
 			Spreedia.gotPermission = false;
@@ -469,7 +515,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 			}else{
 				// no permission or no geolocation // TODO: which? might matter...
-				console.log(" > Geolocation information is unavailable or has been denied");
+				console.log(" > geolocation information is unavailable or has been denied");
 				$("#sortby option[value='location']").prop('disabled', true);
 				$(".store").attr("data-distance", 0);
 				$(".storeinstance").attr("data-distance", 0);
@@ -511,14 +557,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		// show message if no stores are visible
-		var num_icons_clicked = $("button.icon.clicked").length;
-		if (num_icons_clicked == 0){
-			// .matching doesn't matter, just count stores that match price
-			var visiblestores = $(".store").filter(".pricematch");
-		}else{
-			// count stores that match icons and price
-			var visiblestores = $(".store").filter(".matching.pricematch");
-		}
+		var visiblestores = Spreedia.getVisibleStores();
 		if (visiblestores.length == 0){
 			console.log(" > no stores are visible, showing message...");
 			$("#nomatches").show();
@@ -529,6 +568,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("// end updatePrice");
 	}
 
+	// Called by icon button click, set in addListeners()
 	Spreedia.updateIcon = function(id_to_update){
 		console.log("updateIcon: " + id_to_update);
 
@@ -588,6 +628,20 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("// end updateIcon");
 	}
 
+	// Called by sortStores() and by updatePrice()
+	Spreedia.getVisibleStores = function(){
+		// TODO: store as a global/dom thang, updated after price range or icon changes
+		var num_icons_clicked = $("button.icon.clicked").length;
+		if (num_icons_clicked == 0){
+			// .matching doesn't matter, just count stores that match price
+			var visiblestores = $(".store").filter(".pricematch");
+		}else{
+			// count stores that match icons and price
+			var visiblestores = $(".store").filter(".matching.pricematch");
+		}
+		return visiblestores;
+	}
+
 	// Called by loadLocationTemplates() and by updateIcon()
 	Spreedia.sortStores = function(){
 		console.log("sortStores:");
@@ -598,8 +652,8 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// check for visible stores to sort
 		console.log(" > checking for stores to sort...");
-		// TODO: store visiblestores somewhere as a global/dom thang (updated after price range or icon changes)
-		var visiblestores = $(".store").filter(".matching.pricematch");
+		var visiblestores = Spreedia.getVisibleStores();
+
 		if (visiblestores.length > 0){
 			// there are visible stores to sort
 			$("#nomatches").hide();
