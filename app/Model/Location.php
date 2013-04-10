@@ -8,8 +8,9 @@ App::uses('AppModel', 'Model');
 class Location extends AppModel {
 	
 	public $name = "Location";
-	public $cacheQueries = false;
+	// public $cacheQueries = false;
 	public $actsAs = array('Containable');
+	public $recursive = 2;
 	
 	// Relationships
 	
@@ -56,14 +57,20 @@ class Location extends AppModel {
 		return getChildrenRecursive($child); // in bootstrap.php
 	}
 
+	// TODO: no need to pass loc?
+	public function recursiveStoreInstances($loc){
+		return getStoreInstancesRecursive($loc); // in bootstrap.php
+	}
+
 	public function getContained(){
 		// TODO: can this just be done by the Model class itself, without a function?
-		$this->recursive = 2;
+		// TODO: or can we store it in the model somehow for easy access and check if it's there already?
+		// $this->recursive = 2;
 		$this->contain(array(
-			'Parent.Parent',
+			// 'Parent.Parent',
 			'Parent.Parent.Parent',
-			'Child',
-			'Child.Child',
+			// 'Child', ????
+			// 'Child.Child', ????
 			'Storeinstance',
 			'Child.Storeinstance',
 			'Child.Child.Storeinstance'

@@ -13,7 +13,7 @@ class LocationsController extends AppController {
 	public $name = 'Locations';
 	public $scaffold;
 
-	var $helpers = array('Cache', 'Handlebars');
+	var $helpers = array('Cache', 'Handlebars'); // TODO: are we using handlebars?
 	var $cacheAction = "10 seconds";
 
 	// $this->Api->allowPublic('add'); ????
@@ -22,12 +22,15 @@ class LocationsController extends AppController {
 	/* API VIEWS */
 	/* ******************************************************************** */
 	
+	
 	public function view($id = false, $format = 'list'){
 		// TODO: format for list, map no longer needed? but js is still needed? or use .js instead of /js? but that's not cacheing correctly. damn.
+		// TODO: instead of passing a format for 'js', use a different action? except, it's kindaa nice that we can use 'map' or 'list' too...
 		// TODO: if id is false, just use user's location? necessary?
  
 		// load location if it exists
 		$this->Location->id = $id;
+		// TODO: different error handling for different formats?
 		if ($id != false && (!$this->Location->exists() || !$this->Location->isActive()))
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
 		$loc = $this->Location->getContained();
@@ -76,96 +79,59 @@ class LocationsController extends AppController {
 
 	private function setDataForView($loc, $page){
 		// TODO: move any of this to any Models?
+		// TODO: can we bypass some of this faster if location has no children?
+		// TODO: some way to do extendLocation or recursiveStoreInstances without passing loc since id has been set?
 
-		// get extended location info 
-		// TODO: some way to do this without passing loc?
-		$location = $this->Location->extendLocation($loc); 
+		// get extended location info including 'City' and 'Top'
+		// TODO: move to beforeFind or some shit? probably not.
+		$location = $this->Location->extendLocation($loc);
 		
 		// children info
 		$child = $loc['Child'];
 		$children = $this->Location->recursiveChildren($child);
 
-		// parent info TODO: necessary?
+		// parent info TODO: necessary? probably.
 		// $parent = $loc['Location']['parent'] ? $loc['Parent'] : false;
 		// $this->set('parent', $parent);
 
 		// icon info
-		// TODO: load this in some initial page load, rather than with location?
+		// TODO: load this in some initial page load, rather than with location
 		$Icon = ClassRegistry::init('Icon');
 		$icons = $Icon->find("all");
-		/* $iconkeys = array_flip(array_map(function($i){return $i['Icon']['id'];},$icons));
-		foreach ($icons as $key=>$val){
-			$icons[$key]['Stores'] = array();} */
 
-		// store and activity info
-		// TODO: can we bypass some of this faster if location has no children?
-		$Storename = ClassRegistry::init('Storename');
-		$storeinstances = getStoreInstancesRecursive($loc);
-		$storenameids = array();
-		$storeinstanceids = array();
+		// recursively get all local storeinstances and storenames
+		$storeinstances = $this->Location->recursiveStoreInstances($loc);
+
+		// id arrays for storeinstances and storenames
+		$storename_ids = array();
+		$storeinstance_ids = array();
 		foreach($storeinstances as $si){
-			$storeinstanceids[] = $si['id'];
-			$storenameids[] = $si['storename_id'];}
-		// $Storename->recursive = 2;
-		$storenames = $Storename->find("all", array(
-			'conditions' => array('Storename.id' => $storenameids)));
-		$superstorenames = array();
-		// $activity = array();
-		foreach ($storenames as $sn){
-
-			// $sn is a storename with at least one local instance
-			// $ssn will additionally tells us which one(s) it is
-			$ssn = $sn;
-			$ssn['Localinstance'] = array();
-			foreach ($sn['Storeinstance'] as $si){
-
-				// determine if store instance is local
-				if ($si['location_id'] == $location['id']){
-					$si['locationName'] = $location['name'];
-					$islocal = true;
-				}else if(array_key_exists($si['location_id'], $children)){
-					$si['locationName'] = $children[$si['location_id']]['name'];
-					$islocal = true;
-				}else $islocal = false;
-
-				if ($islocal){
-					// store instance is local, so add it to the list of local instances
-					$ssn['Localinstance'][] = $si;
-					// TODO: add activity, if any, to list of local activity
-				}
-			}
-
-			// save storename in local icon array
-			/* foreach ($sn['Icon'] as $sni){
-				$iconkey = $iconkeys[$sni['id']];
-				$icons[$iconkey]['Stores'][] = $sn['Storename']['id'];
-			} */
-
-			$superstorenames[] = $ssn;
+			$storeinstance_ids[] = $si['id'];
+			$storename_ids[] = $si['storename_id'];
 		}
 
-		// activity TODO: ORRRRR ONLY DO THIS CLIENT SIDE?
-		$Activestorename = ClassRegistry::init('Activestorename');
-		// $activestorenames = $Activestorename->find("all", array(
-		// 	'conditions' => array('Activestorename.storename_id' => $storenameids)));
-		$activestorenames = $Activestorename->findAllByStorenameId($storenameids);
-		$Activestoreinstance = ClassRegistry::init('Activestoreinstance');
-		// $activestoreinstances = $Activestoreinstance->find("all", array(
-		// 	'conditions' => array('Activestoreinstance.storeinstance_id' => $storeinstanceids)));
-		$activestoreinstances = $Activestoreinstance->findAllByStoreinstanceId($storeinstanceids);
+		// get all associated storenames
+		$Storename = ClassRegistry::init('Storename');
+		// OLD: $Storename->recursive = 2;
+		$storenames = $Storename->find("all", array(
+			'conditions' => array('Storename.id' => $storename_ids)));
 
-		// prices <-> priceranges TODO: MAYBE NOT NECESSARY? JUST HARD CODE THESE?
-		$Price = ClassRegistry::init('Price');
-		$prices = $Price->find("all");
+		// activity
+		/* $Activestorename = ClassRegistry::init('Activestorename');
+		$activestorenames = $Activestorename->find("all", array(
+			'conditions' => array('Activestorename.storename_id' => $storename_ids)));
+		$Activestoreinstance = ClassRegistry::init('Activestoreinstance');
+		$activestoreinstances = $Activestoreinstance->find("all", array(
+			'conditions' => array('Activestoreinstance.storeinstance_id' => $storeinstance_ids))); */
 
 		// set view vars and serialize for json/ajax
+		// TODO: combine these into $context and use $this->respond($context)?
 		$this->set('location', $location);
 		$this->set('children', $children);
 		$this->set('icons', $icons);
-		$this->set('stores', $superstorenames);
-		$this->set('prices', $prices);
+		$this->set('stores', $storenames);
 		$this->set('page', $page);
-		$this->set('_serialize', array('location', 'children', 'icons', 'stores', 'prices', 'page'));
+		$this->set('_serialize', array('location', 'children', 'icons', 'stores', 'page'));
 		
 	}
 
