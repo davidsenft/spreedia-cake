@@ -129,6 +129,8 @@ class AppController extends Controller {
     }
 
     public function respond($response){
+    	if (isset($response['User']['password']))
+    		unset($response['User']['password']);
     	$this->set('response', $response);
 		$this->set('_serialize', 'response');
     }

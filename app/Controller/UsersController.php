@@ -63,7 +63,6 @@ class UsersController extends AppController {
         }
 
         $user = $this->User->read(null, $id);
-        unset($user['User']['password']);
 
         $this->set('user', $user);
         $this->set('_serialize', array('user'));
