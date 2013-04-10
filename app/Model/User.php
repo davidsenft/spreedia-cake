@@ -8,7 +8,7 @@ App::uses('AppModel', 'Model');
 class User extends AppModel {
 	
 	public $name = "User";
-	public $cacheQueries = false;
+	public $actsAs = array('Containable');
 
 	public $validate = array(
         'username' => array(

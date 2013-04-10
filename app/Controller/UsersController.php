@@ -56,16 +56,12 @@ class UsersController extends AppController {
         $this->set('users', $this->paginate());
     } */
 
+    // TODO: why is we setting id default to null?
     public function view($id = null) {
         $this->User->id = $id;
-        if (!$this->User->exists()) {
-            throw new NotFoundException(__('Invalid user'));
-        }
-
-        $user = $this->User->read(null, $id);
-
-        $this->set('user', $user);
-        $this->set('_serialize', array('user'));
+        if (!$this->User->exists()){throw new NotFoundException(__('Invalid user'));}
+        $user = $this->User->read();
+        $this->respond($user);
     }
 
     /* TODO: this maybe should be createHeart() or deleteHeart()
@@ -76,6 +72,22 @@ class UsersController extends AppController {
         $this->User->read(null, $id);
         debug($this->User);
     } */
+
+    public function favorites($id){
+        $this->User->id = $id;
+        if (!$this->User->exists()){throw new NotFoundException(__('Invalid user'));}
+        $this->User->contain(array(
+            'Savedstore.Storename' => array(
+                'Image',
+                'Pricerange',
+                'Activestorename',
+                'Icon'
+            )
+        ));
+        $user = $this->User->read();
+        $this->respond($user); 
+        // TODO: change to serializing 'stores' and 'page' like w/ Location?
+    }
 
 
 }
