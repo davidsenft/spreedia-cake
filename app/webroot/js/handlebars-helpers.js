@@ -23,7 +23,7 @@ Handlebars.registerHelper('img', function(context) {
  */
 Handlebars.registerHelper('icon', function(context) {
 	// alert(Handlebars.icons[0]);
-	return "<span class='green icon match' data-icon='" + context.id + "' title='" + context.name.replace(/'/g, "&#39;") + "'>" + context.char + "</span>";
+	return "<span class='icon match' data-icon='" + context.id + "' title='" + context.name.replace(/'/g, "&#39;") + "'>" + context.char + "</span>";
 
 });
 
