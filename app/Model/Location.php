@@ -19,6 +19,11 @@ class Location extends AppModel {
 			'className'    => 'Location',
 			'foreignKey'   => 'parent',
 			'conditions'   => array('Parent.statusID' => '1')
+		),
+		'City' => array(
+			'className'    => 'Location',
+			'foreignKey'   => 'city' //,
+			// 'conditions'   => array('isCity' => '0')
 		)
 	);
 	
@@ -67,10 +72,7 @@ class Location extends AppModel {
 		// TODO: or can we store it in the model somehow for easy access and check if it's there already?
 		// $this->recursive = 2;
 		$this->contain(array(
-			// 'Parent.Parent',
 			'Parent.Parent.Parent',
-			// 'Child', ????
-			// 'Child.Child', ????
 			'Storeinstance',
 			'Child.Storeinstance',
 			'Child.Child.Storeinstance'
