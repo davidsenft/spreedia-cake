@@ -29,11 +29,21 @@ function haversine(lat1,lng1,lat2,lng2){
 ;(function( Spreedia, $, undefined ) {
 
 	// current app data
-	Spreedia.context = false;
+	Spreedia.context = false; // current stores data TODO: one for each datatype?
+	Spreedia.dataType = false; // "nearby", "search", "location", or "favorites"
+	Spreedia.format = false; // "list", "map", or "activity" // TODO: not using this yet!!
+
+	// helpful globals
 	Spreedia.matchingstores = 0;
 
 	// user MAJOR TODO!!!!!!!!!!!!!!!!
+	Spreedia.userid = false;
 	Spreedia.user = false;
+
+	// User settings // TODO!!!!!!!!!!!!!!!
+	Spreedia.settings = {
+		"nearThreshhold": 5 // in km
+	}
 
 	// store geolocation permissions (so firefox doesn't keep asking)
 	Spreedia.askedPermission = false;
@@ -48,19 +58,23 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	// Runs only once on page load, calls the appropriate data type init
 	Spreedia.init = function(){
+		// for debugging
+		console.log(Spreedia.context);
 
-		// this is just a hack right now
-		// call the appropriate data type init
-		// get user info?
-		$.post("/users/view/7.json", function(data){
-			console.log("loading user info...")
-			Spreedia.user = data['user'];
-			console.log(Spreedia.user);
+		// load current user data
+		Spreedia.loadUser();
 
-			// user info has been loaded, now get location
-			// TODO: allow for other way around?
-			Spreedia.initLocation();
-		});
+		// get initial datatype
+		Spreedia.dataType = $("body").attr("data-datatype");
+
+		switch (Spreedia.dataType){
+			case "location":
+				Spreedia.initLocation();
+				break;
+			case "favorites":
+				Spreedia.initFavorites();
+				break;
+		}
 
 		// white gradient at the top when scrolling
 		$(window).scroll(function () {
@@ -72,14 +86,46 @@ function haversine(lat1,lng1,lat2,lng2){
 			}
 		});
 
+		$("#bigredbutton").click(function(){
+			// Spreedia.loadFavoritesDataByUserId(Spreedia.userid);
+			Spreedia.loadLocationDataById(5);
+		});
+
+		// body .click listener
+		$("body").on("click", ".click", function(){
+			$(this).toggleClass("clicked");
+
+		// these depend on 'clicked' being set first, so they have to go here
+		}).on("click", "button.icon", function(){
+			Spreedia.updateIcon($(this).attr("data-id"));
+
+		}).on("click", ".heartable", function(){
+			Spreedia.syncHeart(this);
+
+		});
+	}
+
+	// TODO: overkill to do this via json? Just get from session?
+	Spreedia.loadUser = function(){
+		// synchronous json
+		$.ajax({
+			url: '/users/view/' + Spreedia.userid + '.json',
+			dataType: 'json',
+			async: false,
+			// data: myData,
+			success: function(data) {
+				Spreedia.user = data;
+			}
+		});
+		console.log(Spreedia.user);
 	}
 
 	Spreedia.changeDataType = function(){
 		// call the appropriate data type init TODO: or just call data load?
 	}
 
-	// Called by loadLocationData or a user click
-	Spreedia.format = function(format){
+	// Called by datatype init or when user changes format
+	Spreedia.setFormat = function(format){
 		console.log("format: " + format);
 
 		// hide current content view
@@ -92,7 +138,6 @@ function haversine(lat1,lng1,lat2,lng2){
 				$("body").removeClass("map").addClass("list").attr("data-format", "list");
 				$("#list").show();
 				// TODO: only load storelist if it hasn't been loaded, or always load it?
-				// Spreedia.loadLocationData(Spreedia.context);
 				break;
 
 			case "map":
@@ -101,10 +146,9 @@ function haversine(lat1,lng1,lat2,lng2){
 				if (!Spreedia.map) Spreedia.initializeMap();
 				Spreedia.repositionMap();
 				break;
-
 		}
 
-		// TODO: if this is only being used by #format li, simplify
+		// TODO: if this is only being used by #format li, simplify?
 		console.log(" > activating...");
 		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
 	
@@ -112,51 +156,49 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	/*********************************************************** 
-	 * DATA TYPE INITS 
-	 * These are called only by init() or by changeDataType()
-	 * TODO: are these necessary? Or can we just use Data loads?
-	 ***********************************************************/
-
-	Spreedia.initLocation = function(){
-		// TODO: delay map script load on initial pageload if starting in list view?
-		Spreedia.loadLocationData();
-
-	}
-
-	Spreedia.initFavorites = function(){
-
-	}
-
-	// etc...
-
-	/*********************************************************** 
-	 * DATA LOADS 
-	 * These should be called after Spreedia.context has changed
-	 *   (either by Data Type Init or by user action)
+	 * DATATYPE INITS
+	 * These should be called after Spreedia.context has been set/changed
+	 *   (either by page init() or by user action)
 	 * They load the appropriate templates, add listeners, and set format
 	 ***********************************************************/
 
-	// Called after Spreedia.context has been changed
-	Spreedia.loadLocationData = function(){
-		console.log("loadLocationData:");
+	Spreedia.initLocation = function(){
+		console.log("initLocation:");
+		console.time('initLocation');
 
-		console.time('loadLocationData');
+		// prepare location data for templates
+		Spreedia.prepareLocationData();
 
 		// load templates
+		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
+		Spreedia.loadStoreList(); // TODO: move function here, or rename to loadLocation, or reuse it in initFavorites
 		
-		Spreedia.loadTop();
-		Spreedia.loadStores();
-		Spreedia.loadPanel();
+		$("body").removeClass("icons-selected");
+		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
 
-		// TODO: combine these into one?
 		// add general listeners to loaded templates
-		Spreedia.addListeners();
+		Spreedia.afterTemplates();
 
-		// determine and activate format
-		// TODO: does this need to go after templates are loaded?
-		Spreedia.format($("body").attr("data-format"));
+		console.timeEnd('initLocation');
+	}
 
-		console.timeEnd('loadLocationData');
+	Spreedia.initFavorites = function(){
+		console.log("initFavorites:");
+		console.time('initFavorites');
+
+		// prepare favorites data for templates
+		Spreedia.prepareFavoritesData();
+
+		// load templates
+		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
+		Spreedia.loadStoreList();
+
+		$("body").removeClass("icons-selected");
+		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
+
+		Spreedia.afterTemplates();
+
+		console.timeEnd('initFavorites');
 	}
 
 	/*********************************************************** 
@@ -167,7 +209,14 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.loadLocationDataById = function(id){
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
 			Spreedia.context = result;
-			Spreedia.loadLocationData();
+			Spreedia.initLocation();
+		});
+	}
+
+	Spreedia.loadFavoritesDataByUserId = function(id){
+		$.getJSON('/users/favorites/' + id + '.json', function(result) {
+			Spreedia.context = result;
+			Spreedia.initFavorites();
 		});
 	}
 
@@ -182,7 +231,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	}
 
-	// Called by loadLocationData() AFTER loadStores()
+	// Called by initLocation() AFTER loadStoreList()
 	// TODO: right now this is in a weird tweener place, because we aren't actually changing anything about
 	// the panel based on location's json, so we don't need to load it with new location data, we can just
 	// load it once... if we decide to do all icon<->store processing in js, for example, then we should
@@ -205,30 +254,33 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 
 		// icons
-		console.time('icons');
-		$("#iconspanel button.icon").each(function(){
-			var icon_id = $(this).attr("data-id");
-			var count = $(".store .icon").filter("[data-icon='"+icon_id+"']").length;
-			if (count == 0) $(this).hide(); // TODO: hide or make unclickable?
-		})
-		console.timeEnd('icons');
+		console.log(" > checking icons...");
+		$("#iconspanel").find("button.icon").each(function(){
+			var $this = $(this);
+			var count = $(".store.icon-" + $this.attr("data-id")).length; // TODO: save as globals?
+			if (count == 0){
+				$this.attr('title', $this.attr('title') + ' (no matching stores)');
+				$this.addClass("inactive");
+			}
+		});
 	}
 
-	// Called by loadLocationData()
+	// Called by initLocation()
 	Spreedia.loadTop = function(){
 		// handlebars template
 		Spreedia.handle("top");
 
 		// page format
 		$("#format").on("click", "li", function(){
-			Spreedia.format($(this).attr("data-activate"));
+			Spreedia.setFormat($(this).attr("data-activate"));
 		});
 	}
 
-	// Called by loadLocationData()
-	Spreedia.loadStores = function(){
-		// TODO: Spreedia.handle("location");??
-		// TODO: don't load storelist if in map mode? or do? huh?
+	// Called by initLocation()
+	Spreedia.loadStoreList = function(){
+
+		// handlebars template
+		// TODO: should we put this off if currently in map format?
 		Spreedia.handle("storelist");
 
 		// expanding TODO: are we still doing this?
@@ -240,6 +292,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		// user preferences
 		// TODO: somehow get just user prefs related to this one location? b/c otherwise this is going ot get SLOW!!! (i think?)
 		// TODO: this stuff is applicable to more than just location, so, move it?
+		// TODO: shortcut if we're in favorites view, since they're all hearted!!
 		if (Spreedia.user){
 
 			// show existing hearts
@@ -249,7 +302,6 @@ function haversine(lat1,lng1,lat2,lng2){
 				var storename = savedstores[x]['storename_id'];
 				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked").attr('data-ssid', id);
 			}
-
 		}
 
 		// update user location
@@ -267,25 +319,13 @@ function haversine(lat1,lng1,lat2,lng2){
 	 * MISCELLANY / HELPERS / ONE-OFFS
 	 ***********************************************************/
  
-	// TODO: better fn name? not all listeners
-	// Called by loadLocationData() after templates have been loaded
-	Spreedia.addListeners = function(){
-		console.log("adding listeners to loaded templates...");
-
-		// .click listener
-		$("body").on("click", ".click", function(){
-			$(this).toggleClass("clicked");
-
-		// these depend on 'clicked' being set first, so they have to go here
-		}).on("click", "button.icon", function(){
-			Spreedia.updateIcon($(this).attr("data-id"));
-
-		}).on("click", ".heartable", function(){
-			Spreedia.syncHeart(this);
-
-		});
+	// Called by initLocation() and initFavorites() after templates have been loaded
+	Spreedia.afterTemplates = function(){
+		console.log("afterTemplates:");
+		console.log(" > adding listeners to loaded templates...");
 
 		// anything with .hover class gets .over class on hover
+		// TODO: make sure this isn't being added multiple times to the same elements
 		$(".hover").hover(function(){
 			$(this).addClass("over");
 		},function(){
@@ -294,12 +334,80 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// click panel tabs to toggle on/off
 		// TODO: probably getting rid of this, but if not, only needs to be called once in init()
+		// TODO: also click should be delegated
 		$("#paneltabs dd a").click(function(){
 			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
 		});
+
+		// determine and activate format
+		// TODO: is this the best place for this? after everything else?
+		Spreedia.setFormat($("body").attr("data-format"));
+
+		// determine and activate datatype?
+		// TODO: is this in the right place here?
+
+	}
+
+	Spreedia.prepareLocationData = function(){
+		// each storename gets a Localinstance array with info about local store instances
+		var data = Spreedia.context;
+		for(x in data.stores){
+			var storename = data.stores[x];
+			storename.Localinstance = new Array();
+			for (y in storename.Storeinstance){
+				var instance = storename.Storeinstance[y];
+				var loc_id = instance['location_id'];
+				if (loc_id == data.location.id){
+					// store instance is in our location
+					instance.locationName = data.location.name;
+					storename.Localinstance.push(instance);
+				}else if (loc_id in data.children){
+					// store instance is in a child location
+					instance.locationName = data.children[loc_id].name;
+					storename.Localinstance.push(instance);
+				}
+			}
+		}
+	}
+
+	Spreedia.prepareFavoritesData = function(){
+		var thresh = Spreedia.settings.nearThreshhold;
+
+		// each storename gets a Localinstance array with info about nearest store instances
+		var data = Spreedia.context;
+		for(x in data.stores){
+			var savedstore = data.stores[x];
+
+			// make favorites store data look like location store data
+			var things = ["Icon", "Image", "Activestorename", "Pricerange", "Storeinstance"];
+			for(x in things){
+				t = things[x];
+				savedstore[t] = savedstore.Storename[t]; delete savedstore.Storename[t];
+			}
+			
+			savedstore.Localinstance = new Array();
+			for (y in savedstore.Storeinstance){
+				var instance = savedstore.Storeinstance[y];
+				var loc_id = instance['location_id'];
+
+				// all instances considered "local"
+				// TODO: rename these vars?
+				var loc = instance.Location;
+				instance.locationName = loc.City.name + ", " + loc.City.state;
+				if (loc.City.id != loc.id){
+					instance.locationName += " (" + loc.name + ")";
+				}
+				savedstore.Localinstance.push(instance);
+
+			}
+		}
 	}
 
 	Spreedia.syncHeart = function(heartable){
+
+		// TODO: update Spreedia.user!!!!
+		// TODO: maybe even just update Spreedia.user and then call something like syncUser()
+		// TODO: alternatively, just reload user data via json <--- I like this idea!!!!
 
 		if (!Spreedia.user){
 			console.log("TODO: force user registration");
@@ -398,24 +506,31 @@ function haversine(lat1,lng1,lat2,lng2){
 			
 			// update store distances
 			console.log(" > updating store distances from user's position...")
-			$(".store").each(function(){
+			//// $(".store").each(function(){
+			for (x in Spreedia.context.stores){
+
+				//// new
+				var store = Spreedia.context.stores[x];
 
 				// arbitrary high starting number
 				var min_distance = 10000;
 
 				// find distance to nearest storeinstance
-				$(this).find(".storeinstance").each(function(){
+				//// $(this).find(".storeinstance").each(function(){
+				for (y in store.Storeinstance){
 
-					// get lat/lng hypotenuse TODO: just use haversine?!?!?!
-					var storelat = parseFloat($(this).attr("data-lat"));
-					var storelng = parseFloat($(this).attr("data-lng"));
-					/* var latsqdif = Math.pow(storelat - lat, 2);
-					var lngsqdif = Math.pow(storelng - lng, 2);
-					var distance = Math.sqrt(latsqdif + lngsqdif); */
+					//// new
+					var instance = store.Storeinstance[y];
+
+					//// var storelat = parseFloat($(this).attr("data-lat"));
+					//// var storelng = parseFloat($(this).attr("data-lng"));
+					var storelat = parseFloat(instance.lat);
+					var storelng = parseFloat(instance.lng);
 
 					var d_km = haversine(lat,lng,storelat,storelng);
 
-					$(this).attr("data-distance", d_km); // TODO: unnecessary?
+					//// $(this).attr("data-distance", d_km); // TODO: unnecessary?
+					instance.distance = d_km;
 
 					if (d_km < min_distance){
 						// TODO: give info about nearest instance
@@ -423,13 +538,18 @@ function haversine(lat1,lng1,lat2,lng2){
 					}
 
 					var thisfar = Spreedia.humanReadableDistance(d_km);
-					$(this).find(".distance").html(thisfar + " from your location");
+					//// $(this).find(".distance").html(thisfar + " from your location");
+					$("#instance" + instance.id).find(".distance").html(thisfar + " from your location");
 
-				});
+				//// });
+				}
 
-				$(this).attr("data-distance", min_distance);
+				//// $(this).attr("data-distance", min_distance);
+				store.distance = min_distance;
+				$("#store" + store.id).attr("data-distance", min_distance);
 
-			});
+			//// });
+			}
 
 		}else{
 			// position has not changed
@@ -456,7 +576,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	    return y;
 	}	
 
-	// Called by sortStores() and NO LONGER BY loadStores()
+	// Called by sortStores()
 	Spreedia.updateDistances = function(){
 		console.log("updateDistances:");
 
@@ -561,8 +681,9 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.log("// end updatePrice");
 	}
 
-	// Called by icon button click, set in addListeners()
+	// Called by icon button click, set in afterTemplates()
 	Spreedia.updateIcon = function(id_to_update){
+		console.time('updateIcon and sortStores');
 		console.log("updateIcon: " + id_to_update);
 
 		// update icon matches (TODO: is toggling rigorous enough?)
@@ -617,8 +738,9 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		Spreedia.sortStores();
-
+		
 		console.log("// end updateIcon");
+		console.timeEnd('updateIcon and sortStores');
 	}
 
 	// Called by sortStores() and by updatePrice()
@@ -635,7 +757,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		return visiblestores;
 	}
 
-	// Called by loadStores() and by updateIcon()
+	// Called by loadPanel() and by updateIcon()
 	Spreedia.sortStores = function(){
 		console.log("sortStores:");
 		// var pricerank = [1, 5, 8, 10, 2, 3, 4, 6, 7, 9]; // lowest low end, e.g. $-$$$$ comes before $$
