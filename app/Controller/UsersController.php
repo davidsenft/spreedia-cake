@@ -11,7 +11,7 @@ App::uses('AppController', 'Controller');
 class UsersController extends AppController {
     var $name = 'Users';
     var $helpers = array('Html', 'Form');
-    public $scaffold;
+    // public $scaffold;
   
     public function beforeFilter() {
         parent::beforeFilter();
@@ -73,7 +73,8 @@ class UsersController extends AppController {
         debug($this->User);
     } */
 
-    public function favorites($id){
+    public function favorites($id, $format = 'list'){
+
         $this->User->id = $id;
         if (!$this->User->exists()){throw new NotFoundException(__('Invalid user'));}
         $this->User->contain(array(
@@ -81,12 +82,57 @@ class UsersController extends AppController {
                 'Image',
                 'Pricerange',
                 'Activestorename',
+                // 'Storeinstance',
+                // 'Storeinstance.Location',
+                'Storeinstance.Location.City',
                 'Icon'
             )
         ));
         $user = $this->User->read();
-        $this->respond($user); 
-        // TODO: change to serializing 'stores' and 'page' like w/ Location?
+        unset($user['User']['password']);
+
+        $page = array(
+            'datatype' => 'favorites',
+            'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
+            'title' => "Favorites",
+            'seotitle' => 'Favorites | Spreedia',
+            'format' => $format
+        );
+
+        // format as list, map, or external js
+        // TODO: make this a bootstrap function since it's used by Location, etc.?
+        $this->formatView($user, $page, $format);
+    }
+
+    private function formatView($user, $page, $format){
+        if ($format == 'js'){
+            // initial external js data load (cacheable as html)
+            // TODO: would be nice if cached version were also served as js... .htaccess thing?
+            // TODO: make sure serving cached version as html works ok in various browsers
+            $this->RequestHandler->renderAs($this, 'js');
+            $this->setDataForView($user, $page);
+
+        }else if ($this->RequestHandler->responseType() == 'json'){
+            // subsequent ajax json requests (not cached)
+            // TODO: would be faaaannnnntastic if these could be cached 
+            // (would also make /js url and $format unnecessary)
+            $this->setDataForView($user, $page);
+
+        }else{
+            $this->layout = 'basic';
+            $this->set('page', $page);
+        }
+    }
+
+    private function setDataForView($user, $page){
+        $Icon = ClassRegistry::init('Icon');
+        $icons = $Icon->find("all");
+
+        $this->set('user', $user['User']);
+        $this->set('icons', $icons);
+        $this->set('stores', $user['Savedstore']);
+        $this->set('page', $page);
+        $this->set('_serialize', array('user', 'icons', 'stores', 'page'));
     }
 
 
