@@ -1,3 +1,8 @@
+<!-- ************************************************ -->
+<!-- THIS IS THE SAME PAGE AS Users/favorites.ctp!!!! -->
+<!--   Updates made to one should be made to both!!   -->
+<!-- ************************************************ -->
+
 <div id='hb_top' class='alignright'></div>
 
 <div id='wrapper' class='center'>
@@ -49,7 +54,7 @@ $this->Handlebars->template('panel'); ?>
 <!-- INITIAL DATA LOAD (cacheable) -->
 <!-- ******************************************************************** -->
 
-<?php $this->Script->locationData($params); ?>
+<?php $this->Script->jsData($params); ?>
 
 
 <!-- ******************************************************************** -->
@@ -59,6 +64,7 @@ $this->Handlebars->template('panel'); ?>
 <script type="text/javascript">
 
 $(document).ready(function(){
+	Spreedia.userid = <?php echo $_SESSION['Auth']['User']['id']; ?>;
 	Spreedia.init();
 });
 

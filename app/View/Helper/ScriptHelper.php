@@ -4,10 +4,10 @@ App::uses('AppHelper', 'View/Helper');
 
 class ScriptHelper extends AppHelper {
 
-	// loads location data as external js file
-	public function locationData($params){
+	// loads data as cacheable external js file
+	public function jsData($params){
 		// leave off format parameter, format as 'js' instead
-		$jsurl = "/locations/".$params['action']."/".$params['pass'][0]."/js";
+		$jsurl = "/".$params['controller']."/".$params['action']."/".$params['pass'][0]."/js";
 		echo "<script type=\"text/javascript\" src=\"".$jsurl."\"></script>";
 	}
 
