@@ -31,15 +31,15 @@ echo $this->Html->css('spreedia');
 </script>
 
 </head>
-<body class='<?php echo $page['type']; ?> <?php echo $page['format']; ?>' data-format='<?php echo $page['format']; ?>'>
+<body class='<?php echo $page['type']; ?> <?php echo $page['format']; ?>' data-format='<?php echo $page['format']; ?>' data-datatype='<?php echo $page['datatype']; ?>'>
 
 <!-- ******************************************************************** -->
 <!-- CONTENT -->
 <!-- ******************************************************************** -->
 <?php
 	// session/auth error messages
-	/* echo $this->Session->flash();
-  echo $this->Session->flash('auth'); */
+	// debug($_SESSION);
+  /* echo $this->Session->flash('auth'); */
 ?>
 
 <?php echo $this->fetch('content'); ?>
