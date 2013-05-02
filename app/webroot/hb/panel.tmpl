@@ -1,3 +1,5 @@
+<button id='bigredbutton'>CLICK ME!</button>
+
 <div id='sortbypanel' class='subpanel'>
 	Sort by: &nbsp;
 	<select id='sortby'>
@@ -21,10 +23,11 @@
     </div>
 </div>
 
+<!-- TODO: convert to PHP? -->
 <div id='iconspanel' class='subpanel'>
 {{#each icons}}
 	{{#with Icon}}
-		<button data-id='{{this.id}}' class='icon hover click'>{{this.char}}</button>
+		<button data-id='{{this.id}}' title="{{this.name}}" class='icon hover click'>{{this.char}}</button>
 	{{/with}}
 {{/each}}
 </div>

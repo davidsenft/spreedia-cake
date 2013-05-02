@@ -65,8 +65,8 @@ a {text-decoration:none;color:#79a128;} a:hover {color: #488720;} /* old green: 
 nav {width:100%;position:fixed;}
 nav li {list-style-type:none;}
 
-#format {list-style-type:none;float:right;}
-#format li {float:left;}
+#format, #datatype {list-style-type:none;float:right;}
+#format li, #datatype li {float:left;}
 
 #bigredbutton {width:100%;background:red;color:white;border:1px solid black;}
 
@@ -98,7 +98,7 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 
 .store .icon {color:#79a128;cursor:default;}
 .icons-selected .store .icon {color:#ddd;}
-.icons-selected .store .icon.matching {background-color:#79a128;color:white;border-radius:8px;}
+.icons-selected .store .icon.matching {background-color:#79a128;color:white;border-radius:6px;border:1px solid #666;}
 .icons-selected .store {display:none;}
 .icons-selected .store.matching.pricematch {display:block;}
 
@@ -161,9 +161,9 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 .heartable.over {text-transform:uppercase;}
 .heartable.clicked {color:#c43;text-transform:uppercase;text-shadow:1px 1px 1px #ccc;}
 
-.nav-icons li, #format li {color:#ccc;}
-.nav-icons li.over, #format li.over {color:#aaa;}
-.nav-icons li.active, #format li.active {color:#79a128;}
+.nav-icons li, #format li, #datatype li {color:#ccc;}
+.nav-icons li.over, #format li.over, #datatype li.over {color:#aaa;}
+.nav-icons li.active, #format li.active, #datatype li.active {color:#79a128;}
 
 /* ******************************************************************** */
 /* 'VERYSMALL' */
@@ -205,11 +205,13 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     .hide-for-small-if-inactive {display:none!important;}
     .hide-for-small-if-inactive.active {display:block!important;}
 
-    #format {padding:6px;}
+    #datatype, #format {padding:6px;}
 
     .show-for-verybig {display:none!important;}
 
     .nav-text {padding:12px 14px;}
+
+    .heartable {position:relative;bottom:5px;}
 
 @media all and (min-height: 470px) {
 
@@ -230,6 +232,8 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     .pricerange {bottom:5px;}
     div.store {padding:15px;}
     div.store p.graphical {font-size:0.9em;}
+
+    .heartable {bottom:0px;}
 }
 
 @media all and (min-width: 628px) {
@@ -275,7 +279,7 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
     .hide-for-small {display:inline-block!important;}
     .hide-for-small-if-inactive {display:block!important;}
 
-    #format {padding:17px;}
+    #datatype, #format {padding:17px;}
 
     .store div.storethumb {width:25%;}
     .store div.storeinfo {width:72%;}

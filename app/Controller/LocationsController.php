@@ -17,11 +17,11 @@ class LocationsController extends AppController {
 	var $cacheAction = "10 seconds";
 
 	// $this->Api->allowPublic('add'); ????
+	// TODO: REMEMBER WHEN SAVING TO UPDATE RELEVANT CITY REFERENCES
 
 	/* ******************************************************************** */
 	/* API VIEWS */
 	/* ******************************************************************** */
-	
 	
 	public function view($id = false, $format = 'list'){
 		// TODO: format for list, map no longer needed? but js is still needed? or use .js instead of /js? but that's not cacheing correctly. damn.
@@ -37,6 +37,7 @@ class LocationsController extends AppController {
 
 		// set metas and page header stuff
 		$page = array(
+			'datatype' => 'location',
 			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
 			'title' => $loc['Location']['name'],
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
