@@ -1,13 +1,8 @@
 {{#each stores}}
 	
-	<div class='store inherit-match pricematch' data-storename='{{this.Storename.id}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
+	<div id='store{{this.Storename.id}}' class='store inherit-match pricematch{{#each this.Icon}} icon-{{this.id}}{{/each}}' data-storename='{{this.Storename.id}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
 
-		<!-- /* THUMBNAIL IMAGE */ -->
-		<div class='storethumb left'>
-			{{#img360 this.Image.0.name}}{{/img360}}
-		</div>
-
-		<!-- /* STORE INFORMATION */ -->
+		<!-- /* STORE INFORMATION ABOVE IMAGE */ -->
 		<div class='storeinfo right scale-text'>
 
 			<!-- /* HEART */ -->
@@ -19,6 +14,16 @@
 				({{this.Localinstance.length}} locations)
 			{{/if_gt}}
 			</h2>
+
+		</div>
+
+		<!-- /* THUMBNAIL IMAGE */ -->
+		<div class='storethumb left'>
+			{{#img360 this.Image.0.name}}{{/img360}}
+		</div>
+
+		<!-- /* STORE INFORMATION BELOW IMAGE */ -->
+		<div class='storeinfo right scale-text'>
 
 			<!-- /* ICONS AND CHAIN-WIDE INFO */ -->
 			<p class='graphical'> 
@@ -37,7 +42,7 @@
 			<div class='storelocations expandable-for-verysmall'>
 
 			{{#each this.Localinstance}}
-				<div class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
+				<div id='instance{{this.id}}' class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
 					<h3>{{this.locationName}}</h3>
 					<p class='expand'>
 						Address: {{this.storeAddress1}}
