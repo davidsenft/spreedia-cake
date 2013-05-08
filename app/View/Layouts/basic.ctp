@@ -8,6 +8,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Questrial|Cutive+Mono|Josefin+Sans:100,300,400,600,700,100italic,300italic,400italic,600italic,700italic|Libre+Baskerville:400,700,400italic|Andada|Raleway+Dots|Open+Sans+Condensed:300,300italic,700|IM+Fell+French+Canon+SC|Alegreya:400italic,700italic,900italic,400,700,900' rel='stylesheet' type='text/css'>
 
 <title><?php echo $page['seotitle']; ?></title>
 

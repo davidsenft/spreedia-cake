@@ -26,6 +26,17 @@ h1, h2, .bebas, .nav-text {font-family:'BebasRegular';word-spacing:0.2em;}
 }
 .spreediaregular, .icon, .symbol {font-family:'spreediaregular';font-size:2em;}
 
+/* GOOGLE FONTS */
+h1 {font-family:'Andada';font-weight:300;}
+h2 {font-family:'Andada';font-weight:400;font-size:22px;}
+h3 {font-family:'Open Sans Condensed';font-weight:700;font-size:0.8em;text-transform:uppercase;}
+.pricerange, 
+#pricerangepanel .dolladisplay,
+#pricerangepanel .tick .pricemarker {font-family:'Roboto Slab';font-weight:300;}
+#sortbypanel {font-family:'Andada';font-weight:400;}
+#secondary {font-family:'Open Sans Condensed';font-weight:700;}
+
+
 /* ******************************************************************** */
 /* GENERAL -- ALL SIZES */
 /* ******************************************************************** */
