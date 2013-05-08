@@ -87,7 +87,7 @@ button.icon.clicked, button.price.clicked {background-color:#79a128;color:#fff;t
 button.icon.inactive, button.icon.inactive.over {background-color:#f0f0f0;color:#ccc;}
 button.icon.inactive.clicked {background-color:#ddd;color:#bbb;text-shadow:#fff 1px 1px 0;}
 
-button.price {padding-bottom:3px;font-family:BebasRegular;}
+/* button.price {padding-bottom:3px;font-family:'Roboto Slab';font-weight:300;} */
 
 #sortbypanel {background:#fff;text-align:center;font-family:BebasRegular;word-spacing:0.3em;font-size:0.7em;}
 #sortbypanel select#sortby {margin:0 auto;font-family:Arial;}
