@@ -303,4 +303,24 @@ button.price {padding-bottom:3px;font-family:BebasRegular;}
 
     .show-for-verybig {display:inline;}
 
+}}
+
+
+/* EXPERIMENTAL NEW DESIGN */
+#logo {color:#e5e8e1;text-shadow: #371 -1px 0 0.4em, #371 0 1px 0.8em, #241 0 1px 0.1em, #461 0 -1px 0.1em;}
+#hb_top {
+    background-color:#481; /* was 382 */
+    text-shadow: #261 0px -1px 0.2em, #261 0 1px 0.2em; /* was 162 */
 }
+h1 {color:white;}
+.nav-icons li, #format li, #datatype li {
+    color:#999;
+    /* text-shadow: #261 0 -1px 0.1em, #9a8 0 1px 0.1em; */
+}
+.nav-icons li.active, #format li.active, #datatype li.active {
+    color:white;
+    /* text-shadow: #261 0px -1px 0.1em, #9a8 0 1px 0.1em; */
+}
+
+
+
