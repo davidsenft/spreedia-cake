@@ -1,0 +1,7 @@
+{{#each breadcrumbs}}
+	{{#if this.url}}
+		<a href='{{this.url}}'>{{this.name}}</a> &raquo;
+	{{else}}
+		{{this.name}}
+	{{/if}}
+{{/each}}

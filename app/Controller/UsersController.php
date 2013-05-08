@@ -75,6 +75,8 @@ class UsersController extends AppController {
 
     public function favorites($id, $format = 'list'){
 
+        // TODO: accept user handle in addition to ID
+
         $this->User->id = $id;
         if (!$this->User->exists()){throw new NotFoundException(__('Invalid user'));}
         $this->User->contain(array(
@@ -94,7 +96,7 @@ class UsersController extends AppController {
         $page = array(
             'datatype' => 'favorites',
             'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
-            'title' => "Favorites",
+            'title' => $user['User']['handle'] . "'s Favorites",
             'seotitle' => 'Favorites | Spreedia',
             'format' => $format
         );

@@ -1,15 +1,28 @@
-<button id='bigredbutton'>CLICK ME!</button>
+<!--<button id='bigredbutton'>CLICK ME!</button>-->
+
+<div id='sortlabel' class='panellabel'>
+	<label>Sort By</label>
+</div>
 
 <div id='sortbypanel' class='subpanel'>
-	Sort by: &nbsp;
+	<!-- Sort by: &nbsp;-->
 	<select id='sortby'>
+		<option value='default'>Default</option>
 		<option value='icon'>Icon match</option>
-		<option value='random'>Random</option>
+		<!-- <option value='favorites'>Favorites</option> TODO: remove functionality for this -->
+		<!-- <option value='random'>Random</option> TODO: remove functionality for this -->
+		<!-- check for enabled/disabled location in global when panel reloads, slash also just don't fucking reload panel -->
 		<option value='location' disabled='disabled'>Distance</option>
-		<option value='price-hi-low'>$$$$ -> $</option>
-		<option value='price-low-hi'>$ -> $$$$</option>
-		<option value='alphabetical'>A -> Z</option>
+		<option value='price-hi-low'>Price High</option>
+		<option value='price-low-hi'>Price Low</option>
+		<option value='alphabetical'>A to Z</option>
 	</select>
+</div>
+
+<div class='panelspacer'></div>
+
+<div id='filterlabel' class='panellabel'>
+	<label>Filter</label>
 </div>
 
 <div id='pricerangepanel' class='subpanel'>

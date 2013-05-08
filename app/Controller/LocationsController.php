@@ -35,11 +35,19 @@ class LocationsController extends AppController {
 			throw new NotFoundException(__('Whoa there bud, that is NOT a location!'));
 		$loc = $this->Location->getContained();
 
+		// title TODO: move this to model?
+		$title = $loc['Location']['name'];
+		if ($loc['Location']['isCity']) $title .= ", " . $loc['Location']['state'];
+		if ($loc['Location']['parent']){
+			if ($loc['Location']['isCity']) $title .= " (" . $loc['Parent']['name'] . ")";
+			else $title .= " (" . $loc['City']['name'] . ", " . $loc['City']['state'] . ")";
+		}
+
 		// set metas and page header stuff
 		$page = array(
 			'datatype' => 'location',
 			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
-			'title' => $loc['Location']['name'],
+			'title' => /* "Shops in " . */ $title,
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format
 		);
@@ -85,15 +93,20 @@ class LocationsController extends AppController {
 
 		// get extended location info including 'City' and 'Top'
 		// TODO: move to beforeFind or some shit? probably not.
-		$location = $this->Location->extendLocation($loc);
+		// $location = $this->Location->extendLocation($loc);
+		$location = $loc['Location'];
 		
 		// children info
 		$child = $loc['Child'];
 		$children = $this->Location->recursiveChildren($child);
 
+		// city info
+		if (!$location['isCity']) $this->set('city', $loc['City']);
+		else $this->set('city',false);
+
 		// parent info TODO: necessary? probably.
-		// $parent = $loc['Location']['parent'] ? $loc['Parent'] : false;
-		// $this->set('parent', $parent);
+		$parent = $loc['Location']['parent'] ? $loc['Parent'] : false;
+		$this->set('parent', $parent);
 
 		// icon info
 		// TODO: load this in some initial page load, rather than with location
@@ -132,7 +145,7 @@ class LocationsController extends AppController {
 		$this->set('icons', $icons);
 		$this->set('stores', $storenames);
 		$this->set('page', $page);
-		$this->set('_serialize', array('location', 'children', 'icons', 'stores', 'page'));
+		$this->set('_serialize', array('location', 'children', 'city', 'parent', 'icons', 'stores', 'page'));
 		
 	}
 

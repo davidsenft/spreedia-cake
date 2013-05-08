@@ -48,11 +48,12 @@ class Location extends AppModel {
 	// TODO: hasAndBelongsToMany Activity?
 
 	// Return location with virtual fields City and Top determined recursively
+	// TODO: get rid of this if we're now storing 'city' and 'top' as fields in locations table?
 	public function extendLocation($loc){
 		// TODO turn these into collections rather than just names?
 		list($city,$top) = getCityAndTop($loc); // in bootstrap.php
 		$location = $loc['Location'];
-		$location['City'] = $city; 
+		// $location['City'] = $city; 
 		$location['Top'] = $top;
 		return $location;
 	}
@@ -72,6 +73,7 @@ class Location extends AppModel {
 		// TODO: or can we store it in the model somehow for easy access and check if it's there already?
 		// $this->recursive = 2;
 		$this->contain(array(
+			'City',
 			'Parent.Parent.Parent',
 			'Storeinstance',
 			'Child.Storeinstance',

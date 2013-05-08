@@ -6,6 +6,8 @@
 	Spreedia.initializeMap = function(){
 		console.log(" > initializing the map...");
 
+		/* TODO: don't allow map if there's no internet connection? */
+
 		// TODO: throw exception if this hasn't been set?
 		var stores = Spreedia.context["stores"];
 
@@ -145,13 +147,13 @@
 			}));
 		}
 
-		// TODO: make sure this still works here!!
+		// resize map to fit browser window
 		$(window).resize(function(){
-		// TODO: check this on other browsers
 			if ($("#map").is(":visible")){
 				Spreedia.repositionMap();
 			}
 		});
+
 	};
 
 	Spreedia.repositionMap = function(){

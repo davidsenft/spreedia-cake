@@ -29,25 +29,31 @@ function haversine(lat1,lng1,lat2,lng2){
 ;(function( Spreedia, $, undefined ) {
 
 	// current app data
+	// TODO: can we get some of these from the body data attrs? or might they not have loaded?
 	Spreedia.context = false; // current stores data TODO: one for each datatype?
 	Spreedia.dataType = false; // "nearby", "search", "location", or "favorites"
 	Spreedia.format = false; // "list", "map", or "activity" // TODO: not using this yet!!
+	Spreedia.title = $("body").attr("data-title"); // page title
+	console.log("page title: " + Spreedia.title);
 
 	// helpful globals
 	Spreedia.matchingstores = 0;
 
+	// setTimeout() timer
+	Spreedia.timer = 0;
+
 	// user MAJOR TODO!!!!!!!!!!!!!!!!
 	Spreedia.userid = false;
 	Spreedia.user = false;
+	Spreedia.position = false;
 
 	// User settings // TODO!!!!!!!!!!!!!!!
 	Spreedia.settings = {
 		"nearThreshhold": 5 // in km
 	}
 
-	// store geolocation permissions (so firefox doesn't keep asking)
+	// geolocation permission (so firefox doesn't keep asking)
 	Spreedia.askedPermission = false;
-	Spreedia.gotPermission = false;
 
 	// distance units/conversion
 	Spreedia.metric = false;
@@ -60,12 +66,13 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.init = function(){
 		// for debugging
 		console.log(Spreedia.context);
+		var jbody = $("body");
 
 		// load current user data
 		Spreedia.loadUser();
 
 		// get initial datatype
-		Spreedia.dataType = $("body").attr("data-datatype");
+		Spreedia.dataType = jbody.attr("data-datatype");
 
 		switch (Spreedia.dataType){
 			case "location":
@@ -80,9 +87,9 @@ function haversine(lat1,lng1,lat2,lng2){
 		$(window).scroll(function () {
 			var offset = Spreedia.getScrollOffset();
 			if (offset > 0){
-				$("body").addClass("offset");
+				jbody.addClass("offset");
 			}else{
-				$("body").removeClass("offset");
+				jbody.removeClass("offset");
 			}
 		});
 
@@ -92,7 +99,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 
 		// body .click listener
-		$("body").on("click", ".click", function(){
+		jbody.on("click", ".click", function(){
 			$(this).toggleClass("clicked");
 
 		// these depend on 'clicked' being set first, so they have to go here
@@ -102,7 +109,59 @@ function haversine(lat1,lng1,lat2,lng2){
 		}).on("click", ".heartable", function(){
 			Spreedia.syncHeart(this);
 
+		}).on("click", ".store h3", function(){
+			var id_to_load = $(this).attr('data-load-location');
+			Spreedia.loadLocationDataById(id_to_load);
+
+		}).on("click", ".modal-open", function(){
+			var modal_id = $(this).attr('data-modal');
+			console.log("opening " + modal_id + " modal...");
+			$("#" + modal_id).addClass("on");
+			jbody.addClass("modal-on");
+
 		});
+
+		// close modal window
+		$("#modal-back").click(function(){
+			console.log("closing modal...");
+			$(".modal-on").removeClass("modal-on");
+			$(".modal").removeClass("on");
+		});
+
+		// resize page header
+		Spreedia.checkTitle(false);
+		Spreedia.checkTitle(true); // fixes weird behavior in chrome
+		$(window).resize(function(){
+			Spreedia.checkTitle(true);
+		});
+		
+	}
+
+	Spreedia.checkTitle = function(allow_lengthening){
+		var jtitle = $("#pagetitle");
+		var current_title = jtitle.text();
+		var height = $("h1").height();
+
+		if (height > 60){
+			// console.log("h1 title is too long");
+			var words = current_title.split(" ");
+			words.pop();
+			var shorter_title = words.join(" ") + "...";
+			shorter_title = shorter_title.replace(",...","...");
+			// console.log(" > shortening to '" + shorter_title + "'");
+			jtitle.text(shorter_title);
+			Spreedia.checkTitle(false);
+
+		}else if ((current_title != Spreedia.title) && allow_lengthening){
+			// can we undo overflow?
+			clearTimeout(Spreedia.timer);
+			Spreedia.timer = setTimeout(function(){
+				// console.log("attempting to put the title back...");
+				jtitle.text(Spreedia.title);
+				Spreedia.checkTitle(false);
+			},300);
+		}
+
 	}
 
 	// TODO: overkill to do this via json? Just get from session?
@@ -115,6 +174,7 @@ function haversine(lat1,lng1,lat2,lng2){
 			// data: myData,
 			success: function(data) {
 				Spreedia.user = data;
+				// TODO: maybe run updatePosition() here?
 			}
 		});
 		console.log(Spreedia.user);
@@ -141,6 +201,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				break;
 
 			case "map":
+				/* TODO: don't go to map if no internet connection */
 				$("body").removeClass("list").addClass("map").attr("data-format", "map");
 				$("#map").show();
 				if (!Spreedia.map) Spreedia.initializeMap();
@@ -171,6 +232,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// load templates
 		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
+		Spreedia.loadBreadcrumbs();
 		Spreedia.loadStoreList(); // TODO: move function here, or rename to loadLocation, or reuse it in initFavorites
 		
 		$("body").removeClass("icons-selected");
@@ -207,6 +269,14 @@ function haversine(lat1,lng1,lat2,lng2){
 	 ***********************************************************/
 
 	Spreedia.loadLocationDataById = function(id){
+
+		// TODO: all location just load their top(ish?) location, and then here, we first check if
+		// TODO: location is in the current chain, and if so just apply a show/hide filter!!
+		// TODO: maybe just like each loc has a city, each loc has a 'load' location to actually load?
+
+		console.log("----------------------------");
+		console.log("loadLocationDataById: " + id);
+		console.log("----------------------------");
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
 			Spreedia.context = result;
 			Spreedia.initLocation();
@@ -214,6 +284,9 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	Spreedia.loadFavoritesDataByUserId = function(id){
+		console.log("----------------------------");
+		console.log("loadFavoritesDataByUserId: " + id);
+		console.log("----------------------------");
 		$.getJSON('/users/favorites/' + id + '.json', function(result) {
 			Spreedia.context = result;
 			Spreedia.initFavorites();
@@ -248,9 +321,9 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// sorting
 		console.log(" > sorting...");
-		Spreedia.sortStores();
+		Spreedia.updatePosition(true);
 		$("#sortby").change(function(){
-			Spreedia.sortStores();
+			Spreedia.sortStores(false);
 		});
 
 		// icons
@@ -263,7 +336,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				$this.addClass("inactive");
 			}
 		});
-	}
+	};
 
 	// Called by initLocation()
 	Spreedia.loadTop = function(){
@@ -274,7 +347,12 @@ function haversine(lat1,lng1,lat2,lng2){
 		$("#format").on("click", "li", function(){
 			Spreedia.setFormat($(this).attr("data-activate"));
 		});
-	}
+	};
+
+	Spreedia.loadBreadcrumbs = function(){
+		// handlebars template
+		Spreedia.handle("breadcrumbs");
+	};
 
 	// Called by initLocation()
 	Spreedia.loadStoreList = function(){
@@ -305,15 +383,15 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		// update user location
-		// Spreedia.updateDistances();
-	}
+		// Spreedia.updatePosition();
+	};
 
 	Spreedia.handle = function(name){
 		console.log(" > loading '" + name + "' template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
 		var html = template(Spreedia.context);
 		$("#hb_" + name).html(html);
-	}
+	};
 
 	/*********************************************************** 
 	 * MISCELLANY / HELPERS / ONE-OFFS
@@ -345,7 +423,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// determine and activate datatype?
 		// TODO: is this in the right place here?
-
+		
 	}
 
 	Spreedia.prepareLocationData = function(){
@@ -358,16 +436,52 @@ function haversine(lat1,lng1,lat2,lng2){
 				var instance = storename.Storeinstance[y];
 				var loc_id = instance['location_id'];
 				if (loc_id == data.location.id){
+
 					// store instance is in our location
+					// TODO: just give it the whole friggin location
 					instance.locationName = data.location.name;
+					instance.City = data.city ? data.city : data.location;
 					storename.Localinstance.push(instance);
+
 				}else if (loc_id in data.children){
+
 					// store instance is in a child location
 					instance.locationName = data.children[loc_id].name;
+					var city_id = data.children[loc_id].city
+					if (city_id in data.children){
+						instance.City = data.children[city_id];
+					}else{
+						// TODO: only do this once, and store City in context!
+						// TODO: or just fucking do shit the easy way
+						instance.City = data.city ? data.city : data.location;
+					}
 					storename.Localinstance.push(instance);
 				}
 			}
 		}
+
+		// breadcrumbs
+		// TODO: shouldn't have to push location and parent chain separately... this is dumb.
+		// Just make fucking JSON return everything (location, parent, city, children) in
+		// one nice context!!!!
+		Spreedia.context.breadcrumbs = [];
+		// TODO: somehow use one global/helper function for this and the H1?
+		function locationName(location){
+			if (location.isCity) return location.name + ", " + location.state;
+			else return location.name;
+		}
+		function pushLocationCrumb(location){
+			var url = "/locations/view/" + location.id;
+			var locname = locationName(location);
+			var crumb = {name: locname, url: url};
+			Spreedia.context.breadcrumbs.push(crumb);
+			if (location.parent) pushLocationCrumb(location.Parent);
+		}
+		Spreedia.context.breadcrumbs.push({name: locationName(Spreedia.context.location), url: false});	
+		if (Spreedia.context.parent) pushLocationCrumb(Spreedia.context.parent);
+		Spreedia.context.breadcrumbs.push({name: "Search by Location", url: "/locations"});
+		Spreedia.context.breadcrumbs.reverse();			
+
 	}
 
 	Spreedia.prepareFavoritesData = function(){
@@ -394,6 +508,9 @@ function haversine(lat1,lng1,lat2,lng2){
 				// TODO: rename these vars?
 				var loc = instance.Location;
 				instance.locationName = loc.City.name + ", " + loc.City.state;
+				// instance.city = loc.City.name;
+				// instance.state = loc.City.state;
+				instance.City = loc.City; // TODO: just keep this as is with Location.City?
 				if (loc.City.id != loc.id){
 					instance.locationName += " (" + loc.name + ")";
 				}
@@ -475,88 +592,7 @@ function haversine(lat1,lng1,lat2,lng2){
 				if ((d_rounded == 1 || d_rounded == "1/2") && d_unit == "miles") d_unit = "mile";
 			}
 		}
-		return "About " + d_rounded + " " + d_unit;
-	}
-
-	// Called by updateDistances() only if position is supported by browser
-	Spreedia.setDistancesFromPos = function(position){
-		console.log("setDistancesFromPos:");
-		
-		// are we getting geolocation permission for the first time?
-		if (Spreedia.gotPermission == false){
-			console.log(" > GEOLOCATION SUCCESS!");
-			console.log(" > accuracy: " + position.coords.accuracy);
-			console.log(" > heading: " + position.coords.heading);
-			console.log(" > speed: " + position.coords.speed);
-			Spreedia.gotPermission = true;
-			console.log(" > enabling location-based sorting...");
-			$("#sortby option[value='location']").prop('disabled', false);
-		}
-
-		// user's current position
-		var lat = position.coords.latitude, lng = position.coords.longitude;
-		
-		// determine if position has changed
-		var previouslat = $("body").attr("lat"), previouslng = $("body").attr("lng");
-		if (lat != previouslat || lng != previouslng){
-
-			// position has changed, or we're getting it for the first time
-			console.log(" > user coordinates are: " + lat + ", " + lng);
-			$("body").attr("lat", lat).attr("lng", lng);
-			
-			// update store distances
-			console.log(" > updating store distances from user's position...")
-			//// $(".store").each(function(){
-			for (x in Spreedia.context.stores){
-
-				//// new
-				var store = Spreedia.context.stores[x];
-
-				// arbitrary high starting number
-				var min_distance = 10000;
-
-				// find distance to nearest storeinstance
-				//// $(this).find(".storeinstance").each(function(){
-				for (y in store.Storeinstance){
-
-					//// new
-					var instance = store.Storeinstance[y];
-
-					//// var storelat = parseFloat($(this).attr("data-lat"));
-					//// var storelng = parseFloat($(this).attr("data-lng"));
-					var storelat = parseFloat(instance.lat);
-					var storelng = parseFloat(instance.lng);
-
-					var d_km = haversine(lat,lng,storelat,storelng);
-
-					//// $(this).attr("data-distance", d_km); // TODO: unnecessary?
-					instance.distance = d_km;
-
-					if (d_km < min_distance){
-						// TODO: give info about nearest instance
-						min_distance = d_km;
-					}
-
-					var thisfar = Spreedia.humanReadableDistance(d_km);
-					//// $(this).find(".distance").html(thisfar + " from your location");
-					$("#instance" + instance.id).find(".distance").html(thisfar + " from your location");
-
-				//// });
-				}
-
-				//// $(this).attr("data-distance", min_distance);
-				store.distance = min_distance;
-				$("#store" + store.id).attr("data-distance", min_distance);
-
-			//// });
-			}
-
-		}else{
-			// position has not changed
-			console.log(" > user position has not changed (" + lat + ", " + lng + ")");
-		}
-
-		console.log("// end setDistancesFromPos");
+		return "About <strong>" + d_rounded + " " + d_unit + "</strong>";
 	}
 
 	Spreedia.getScrollOffset = function(){
@@ -574,14 +610,74 @@ function haversine(lat1,lng1,lat2,lng2){
 	    }
 	    // return [x, y];
 	    return y;
-	}	
+	}
 
-	// Called by sortStores()
-	Spreedia.updateDistances = function(){
-		console.log("updateDistances:");
+	// Called by UpdatePosition()
+	Spreedia.setDistancesFromPosition = function(){
+		// TODO: check to see if distances are already set correctly
+		// update store distances
+		console.log(" > > setting store distances from user's position...");
+		var lat = Spreedia.position.coords.latitude, 
+			lng = Spreedia.position.coords.longitude;
+		for (x in Spreedia.context.stores){
+			var store = Spreedia.context.stores[x];
 
-		// error handling callback for geolocation call
-		function showError(error){
+			// arbitrary high starting number
+			var min_distance = 10000;
+			var closest_instance;
+
+			// find distance to nearest storeinstance
+			for (y in store.Storeinstance){
+				var instance = store.Storeinstance[y];
+				var storelat = parseFloat(instance.lat);
+				var storelng = parseFloat(instance.lng);
+				var d_km = haversine(lat,lng,storelat,storelng);
+				instance.distance = d_km;
+				if (d_km < min_distance){
+					// TODO: give info about nearest instance
+					min_distance = d_km;
+					closest_instance = instance.id;
+				}
+				var thisfar = Spreedia.humanReadableDistance(d_km);
+				$("#instance" + instance.id).find(".distance").html(thisfar + " from your location");
+			}
+			store.distance = min_distance;
+
+			// use the distance of the closest instance
+			var jstore = $("#store" + store.Storename.id);
+			jstore.attr("data-distance", min_distance);
+
+			if (store.Storeinstance.length > 1){
+				// list closest store instance first
+				jstore.find(".storelocations").prepend($("#instance" + closest_instance));
+			}
+
+		}
+	}
+
+	// Called by sortStores(false) and calls sortStores(true)
+	Spreedia.updatePosition = function(sort_after){
+		console.log("updatePosition:");
+
+		function geoSuccess(position){
+			console.log(" > GEOLOCATION SUCCESS:");
+
+			var lat = position.coords.latitude, 
+				lng = position.coords.longitude;
+
+			$("#sortby option[value='location']").prop('disabled', false);
+			Spreedia.position = position;
+			Spreedia.setDistancesFromPosition();
+
+			console.log(" > > user coordinates are: " + lat + ", " + lng);
+
+			// update sort now if we're sorting by distance
+			if (sort_after) Spreedia.sortStores(true);
+
+			console.log(" > // end geoSuccess");
+		}
+
+		function geoError(error){
 			var msg;
 			switch(error.code){
 			case error.PERMISSION_DENIED:
@@ -597,20 +693,22 @@ function haversine(lat1,lng1,lat2,lng2){
 				msg = "An unknown error occurred."
 				break;
 			}
-			console.log("GEOLOCATION ERROR: " + msg);
-			console.log(" > disabling location-based sorting...");
+			console.log(" > GEOLOCATION ERROR: " + msg);
+			console.log(" > > disabling location-based sorting...");
 			$("#sortby option[value='location']").prop('disabled', true);
-			Spreedia.gotPermission = false;
+			Spreedia.position = false;
+			// TODO: error message of some kind?
 		}
 
 		var do_geolocation = false;
+		var do_sort = false;
 		if (!Spreedia.askedPermission && navigator.geolocation){
 			// we haven't even tried yet
 			do_geolocation = true;
 
 		}else{
 			// we already tried, so what happened?
-			if (Spreedia.gotPermission){
+			if (Spreedia.position){
 				// great! do we need to update the info? TODO: only if mobile? + better console msgs
 				var firefox = !!(navigator.userAgent.indexOf("Firefox")>0);
 				if (!firefox){
@@ -620,16 +718,20 @@ function haversine(lat1,lng1,lat2,lng2){
 						do_geolocation = true;
 					}else{
 						console.log(" > no need to update user location (since we just asked)");
+						do_sort = true;
 					}
 									
 				}else{
 					console.log(" > can't update user location (in order to be polite on firefox)");
+					do_sort = true;
 				}	
 
 			}else{
 				// no permission or no geolocation // TODO: which? might matter...
 				console.log(" > geolocation information is unavailable or has been denied");
+				console.log(" > disabling location-based sorting...");
 				$("#sortby option[value='location']").prop('disabled', true);
+				// TODO: if distance is selected, change to something else?
 				$(".store").attr("data-distance", 0);
 				$(".storeinstance").attr("data-distance", 0);
 			}
@@ -638,11 +740,17 @@ function haversine(lat1,lng1,lat2,lng2){
 		if (do_geolocation){
 			// geolocation
 			console.log(" > asking geolocation permission...");
-			navigator.geolocation.getCurrentPosition(Spreedia.setDistancesFromPos, showError);
+			// TODO: set time limit for response, if it doesn't happen, go "offline!"
+			navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
 			Spreedia.askedPermission = new Date();
+
+		}else if (sort_after && do_sort){
+			// update sort
+			Spreedia.setDistancesFromPosition();
+			Spreedia.sortStores(true);
 		}
 
-		console.log("// end updateDistances");
+		console.log("// end updatePosition");
 	}
 
 	Spreedia.updatePrice = function(from, to){
@@ -737,7 +845,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		}
 
-		Spreedia.sortStores();
+		Spreedia.sortStores(false);
 		
 		console.log("// end updateIcon");
 		console.timeEnd('updateIcon and sortStores');
@@ -745,7 +853,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 	// Called by sortStores() and by updatePrice()
 	Spreedia.getVisibleStores = function(){
-		// TODO: store as a global/dom thang, updated after price range or icon changes
+		// TODO: definitely store as a global/dom thang, updated after price range or icon changes
 		var num_icons_clicked = $("button.icon.clicked").length;
 		if (num_icons_clicked == 0){
 			// .matching doesn't matter, just count stores that match price
@@ -757,8 +865,8 @@ function haversine(lat1,lng1,lat2,lng2){
 		return visiblestores;
 	}
 
-	// Called by loadPanel() and by updateIcon()
-	Spreedia.sortStores = function(){
+	// Called by updateIcon() and by updatePosition()
+	Spreedia.sortStores = function(distances_are_good){
 		console.log("sortStores:");
 		// var pricerank = [1, 5, 8, 10, 2, 3, 4, 6, 7, 9]; // lowest low end, e.g. $-$$$$ comes before $$
 		// var pricerank = [1, 3, 7, 10, 2, 4, 6, 5, 8, 9]; // average, then less variable, e.g. $$ comes before $-$$$
@@ -776,10 +884,46 @@ function haversine(lat1,lng1,lat2,lng2){
 			// how are we sorting?
 			var sortby = $("#sortby").val();
 			var tabtext;
-			console.log(" > sorting " + visiblestores.length + " stores by " + sortby + "...");
 
-			// update distances
-			Spreedia.updateDistances();
+			// if set to default, choose sorting method
+			if (sortby == "default"){
+				console.log(" > determining default sorting method...");
+				// TODO: we should store num icons clicked and geo success as global
+				if ($("button.icon.clicked").length == 0 && Spreedia.position){
+					sortby = "location";
+				}else{
+					sortby = "icon";
+				}
+			}
+
+			console.log(" > checking if we're ready to sort by " + sortby + "...");
+
+			if (sortby == "location"){
+				if (!distances_are_good){
+					console.log(" > not ready to sort by location yet");
+					console.log(" > updating distances...");
+					// this will sort with correct distances when it's done
+					Spreedia.updatePosition(true);
+					console.log("// end sortStores");
+					return false;
+				}else{
+					console.log(" > we're ready to sort by location");
+				}
+			}else{
+				if (distances_are_good){
+					// TODO: remove?
+					// this is happening because panel is reloading and resetting distance to disabled
+					console.log(" > hmmmmm, looks like we already sorted");
+					console.log(" > THIS SHOULD NEVER HAPPEN NOW! REMOVE?");
+					console.log("// end sortStores");
+					return false;
+				}else{
+					console.log(" > updating distances just for fun...");
+					Spreedia.updatePosition(false);
+				}
+			}
+
+			console.log(" > sorting " + visiblestores.length + " stores...");
 
 			// sort visible stores
 			visiblestores.sortElements(function(a, b){
@@ -810,6 +954,13 @@ function haversine(lat1,lng1,lat2,lng2){
 					 				-1;
 					 	break;
 
+					/* case "favorites":
+						tabtext = "Favorites";
+						var ranka = $(a).find(".heartable").hasClass("clicked") ? 1 : 0;
+						var rankb = $(b).find(".heartable").hasClass("clicked") ? 1 : 0;
+						var result = rankb - ranka;
+						break; */
+
 					case "price-low-hi":
 						tabtext = "Price Low->Hi";
 						var ranka = pricerank[$(a).attr("data-pricerange") - 1];
@@ -831,10 +982,10 @@ function haversine(lat1,lng1,lat2,lng2){
 						var result = ranka > rankb ? 1 : ranka == rankb ? (Math.floor(Math.random()*2)*2)-1 : -1;
 						break;
 
-					case "random":
+					/* case "random":
 						tabtext = "Random";
 						var result = (Math.floor(Math.random()*2)*2)-1;
-						break;
+						break; */
 
 					case "location":
 						tabtext = "Closest to Me";
@@ -845,6 +996,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 				}
 
+				// console.log("sort comparison: " + result);
 				return result;
 			});
 

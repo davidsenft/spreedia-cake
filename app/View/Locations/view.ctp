@@ -3,21 +3,28 @@
 <!--   Updates made to one should be made to both!!   -->
 <!-- ************************************************ -->
 
-<div id='hb_top' class='alignright'></div>
+<div id='hb_top'></div>
+
+<div id='secondary'>
+	<span id="hb_breadcrumbs" class='hide-for-small'></span>
+	<a id='openpanel' class='modal-open' data-modal='panel' href='javascript:void(0);'>SORT AND FILTER</a>
+</div>
+
+<div id="modal-back"></div>
 
 <div id='wrapper' class='center'>
 
 	<!-- <div id='hb_location'></div> -->
 
 	<!-- panel tabs -->
-	<dl id="paneltabs">
+	<!-- <dl id="paneltabs">
 		<dd id="sortbytab"><a href="javascript:void()" data-panel="sortby">Sort</a></dd>
 		<dd id="pricerangetab"><a href="javascript:void()" data-panel="pricerange" class="dolladisplay">$-$$$$</a></dd>
 		<dd id="iconstab"><a href="javascript:void()" data-panel="icons">Categories</a></dd>
-	</dl>
+	</dl> -->
 
 	<!-- panel TODO: this doesn't really need to be a template -->
-	<div id="panel" class="left">
+	<div id="panel" class="left modal">
 		<div id='hb_panel' class='panel' style='border-top:0;'></div>
 	</div>
 
@@ -39,6 +46,7 @@
 <!-- ******************************************************************** -->
 <?php 
 $this->Handlebars->template('top');
+$this->Handlebars->template('breadcrumbs');
 $this->Handlebars->template('location');
 $this->Handlebars->template('storelist');
 $this->Handlebars->template('panel'); ?>

@@ -43,13 +43,13 @@
 
 			{{#each this.Localinstance}}
 				<div id='instance{{this.id}}' class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
-					<h3>{{this.locationName}}</h3>
+					<h3 data-load-location='{{this.location_id}}'>{{this.locationName}}</h3>
 					<p class='expand'>
-						Address: {{this.storeAddress1}}
+						Address: {{this.storeAddress1}} <a class='to_map'>See on map</a>
 						{{#if this.storeAddress2}}
 							<br>{{this.storeAddress2}}
 						{{/if}}
-						<br><span class='citystate'></span>, {{this.storeZip}}
+						<br><span class='citystate'>{{this.City.name}}, {{this.City.state}}</span> {{this.storeZip}}
 					</p>
 					<p class='expand'>Store hours: {{this.storeHours}}</p>
 					<p class='distance'></p><!-- TODO: make sure this doesn't show in other browsers -->
