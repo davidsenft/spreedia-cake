@@ -67,6 +67,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		// for debugging
 		console.log(Spreedia.context);
 		var jbody = $("body");
+		console.log(Spreedia.storeinstance);
 
 		// load current user data
 		Spreedia.loadUser();
@@ -80,6 +81,9 @@ function haversine(lat1,lng1,lat2,lng2){
 				break;
 			case "favorites":
 				Spreedia.initFavorites();
+				break;
+			case "storeinstance":
+				Spreedia.initStoreInstance();
 				break;
 		}
 
@@ -138,6 +142,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	}
 
 	Spreedia.checkTitle = function(allow_lengthening){
+		// console.log("checkTitle:");
 		var jtitle = $("#pagetitle");
 		var current_title = jtitle.text();
 		var height = $("h1").height();
@@ -156,7 +161,7 @@ function haversine(lat1,lng1,lat2,lng2){
 			// can we undo overflow?
 			clearTimeout(Spreedia.timer);
 			Spreedia.timer = setTimeout(function(){
-				// console.log("attempting to put the title back...");
+				// console.log(" > attempting to put the title back...");
 				jtitle.text(Spreedia.title);
 				Spreedia.checkTitle(false);
 			},300);
@@ -178,10 +183,6 @@ function haversine(lat1,lng1,lat2,lng2){
 			}
 		});
 		console.log(Spreedia.user);
-	}
-
-	Spreedia.changeDataType = function(){
-		// call the appropriate data type init TODO: or just call data load?
 	}
 
 	// Called by datatype init or when user changes format
@@ -263,34 +264,71 @@ function haversine(lat1,lng1,lat2,lng2){
 		console.timeEnd('initFavorites');
 	}
 
+	Spreedia.initStoreInstance = function(){
+		console.log("initStoreInstance:");
+		console.time('initStoreInstance');
+
+		// if we already have context, keep it, but if not, the store is our context
+		// TODO: questionable. fetch top store context with Ajax? Get it in the first place?
+		if (!Spreedia.context) Spreedia.context = Spreedia.storeinstance;
+
+		Spreedia.loadTop();
+		Spreedia.loadStoreinstance();
+
+		Spreedia.afterTemplates();
+
+		// TODO: could move this to afterTemplates()
+		Spreedia.initStoreSlider();
+
+		console.timeEnd('initStoreInstance');
+	}
+
 	/*********************************************************** 
 	 * AJAX DATA LOADS
 	 * These fetch json data, set Spreedia.context, and call a Data Load
 	 ***********************************************************/
 
+	// loads a location and stores resulting data in context
 	Spreedia.loadLocationDataById = function(id){
 
 		// TODO: all location just load their top(ish?) location, and then here, we first check if
 		// TODO: location is in the current chain, and if so just apply a show/hide filter!!
 		// TODO: maybe just like each loc has a city, each loc has a 'load' location to actually load?
 
-		console.log("----------------------------");
-		console.log("loadLocationDataById: " + id);
-		console.log("----------------------------");
+		Spreedia.logHeader("loadLocationDataById: " + id);
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
 			Spreedia.context = result;
+			Spreedia.setDataType("location");
 			Spreedia.initLocation();
 		});
 	}
 
+	// loads a favorites list and stores resulting data in context
 	Spreedia.loadFavoritesDataByUserId = function(id){
-		console.log("----------------------------");
-		console.log("loadFavoritesDataByUserId: " + id);
-		console.log("----------------------------");
+		Spreedia.logHeader("loadFavoritesDataByUserId: " + id);
 		$.getJSON('/users/favorites/' + id + '.json', function(result) {
 			Spreedia.context = result;
+			Spreedia.setDataType("favorites");
 			Spreedia.initFavorites();
 		});
+	}
+
+	Spreedia.loadStoreinstanceDataById = function(id){
+		Spreedia.logHeader("loadStoreinstanceDataById: " + id);
+		// TODO
+	}
+
+	// called by Ajax Data Loads
+	Spreedia.setDataType = function(datatype){
+		Spreedia.dataType = datatype;
+		Spreedia.jbody.attr("data-datatype", datatype);
+	}
+
+	// called by Ajax Data Loads
+	Spreedia.logHeader = function(msg){
+		console.log("------------------------------------");
+		console.log(msg);
+		console.log("------------------------------------");
 	}
 
 	/*********************************************************** 
@@ -298,9 +336,10 @@ function haversine(lat1,lng1,lat2,lng2){
 	 * These load a handlebars template and add appropriate listeners
 	 ***********************************************************/
 
-	// Called by loadStoreinstanceData()
-	Spreedia.loadStore = function(){
-		// ... 
+	// TODO
+	Spreedia.loadStoreinstance = function(){
+		// handlebars template
+		Spreedia.handle("storeinstance","storeinstance");
 
 	}
 
@@ -371,25 +410,19 @@ function haversine(lat1,lng1,lat2,lng2){
 		// TODO: somehow get just user prefs related to this one location? b/c otherwise this is going ot get SLOW!!! (i think?)
 		// TODO: this stuff is applicable to more than just location, so, move it?
 		// TODO: shortcut if we're in favorites view, since they're all hearted!!
-		if (Spreedia.user){
-
-			// show existing hearts
-			var savedstores = Spreedia.user['Savedstore'];
-			for (x in savedstores){
-				var id = savedstores[x]['id'];
-				var storename = savedstores[x]['storename_id'];
-				$("[data-storename='" + storename + "']").find(".heartable").addClass("clicked").attr('data-ssid', id);
-			}
-		}
 
 		// update user location
 		// Spreedia.updatePosition();
 	};
 
-	Spreedia.handle = function(name){
+	// handle template 'name' with context 'context' (Spreedia.context by default)
+	// 'context' here is a string representing a Spreedia property, not the object itself
+	// TODO: see if Spreedia has a property that matches name, and if so, use that for the context
+	Spreedia.handle = function(name, context){
+		if (!context || !Spreedia.hasOwnProperty(context)) context = "context";
 		console.log(" > loading '" + name + "' template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
-		var html = template(Spreedia.context);
+		var html = template(Spreedia[context]);
 		$("#hb_" + name).html(html);
 	};
 
@@ -415,7 +448,20 @@ function haversine(lat1,lng1,lat2,lng2){
 		// TODO: also click should be delegated
 		$("#paneltabs dd a").click(function(){
 			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
-		});
+		}); */
+
+		if (Spreedia.user){
+
+			// show existing hearts
+			var savedstores = Spreedia.user['Savedstore'];
+			for (x in savedstores){
+				var savedstore_id = savedstores[x]['id'];
+				var storename_id = savedstores[x]['storename_id'];
+				$(".heartable[data-storename='" + storename_id + "']").addClass("clicked")
+					.attr('data-ssid', savedstore_id)
+					.attr('title', "This is one of your favorite stores");
+			}
+		}
 
 		// determine and activate format
 		// TODO: is this the best place for this? after everything else?
@@ -531,29 +577,29 @@ function haversine(lat1,lng1,lat2,lng2){
 			return false;
 		}
 
-		// TODO: add or remove ss-id to/from the .heartable
 		// NOTE: this depends on clicked already being updated!
-		var action = $(heartable).hasClass("clicked") ? "add" : "delete"; 
+		var jheartable = $(heartable);
+		var action = jheartable.hasClass("clicked") ? "add" : "delete"; 
 		var model = "savedstore";
 
 		switch (action){
 			case "add":
 				var user_id = Spreedia.user['User']['id']; // TODO: make sure this is calculated at time of click
-				var storename_id = $(heartable).parents(".store").attr("data-storename");
+				var storename_id = jheartable.attr("data-storename");
 				var post_data = {"user_id" : user_id, "storename_id" : storename_id};
 				var callback = function(data){
 					console.log("added " + model + " with id " + data);
-					$(heartable).attr("data-ssid", data);
+					jheartable.attr("data-ssid", data).attr("title", "This is one of your favorite stores");
 					// success callback TODO: indicate sync
 				};
 				break;
 
 			case "delete":
-				var ss_id = $(heartable).attr('data-ssid');
+				var ss_id = jheartable.attr('data-ssid');
 				var post_data = {"id" : ss_id};
 				var callback = function(data){
 					console.log("deleted " + model + " with id " + data);
-					$(heartable).attr("data-ssid", "");
+					jheartable.attr("data-ssid", "").attr("title", "Add to your favorite stores");
 					// success callback TODO: indicate sync
 				};
 				break;
@@ -1010,6 +1056,34 @@ function haversine(lat1,lng1,lat2,lng2){
 		}
 
 		console.log("// end sortStores");
+	}
+
+	Spreedia.initStoreSlider = function(){
+		var navbuttons = $('#slidenav button');
+
+		$('.iosSlider').iosSlider({
+			autoSlide: true,
+			snapToChildren: true,
+			desktopClickDrag: true,
+			navSlideSelector: navbuttons,
+			scrollbar: true,
+			// scrollbarHide: false
+			scrollbarLocation: 'bottom',
+			// scrollbarHeight: '6px',
+			// scrollbarBackground: 'url(_img/some-img.png) repeat 0 0',
+			// scrollbarBorder: '1px solid #000',
+			// scrollbarMargin: '0 30px 16px 30px',
+			// scrollbarOpacity: '0.75',
+			onSlideChange: Spreedia.changeSlideIdentifier
+		});
+
+		navbuttons.first().addClass("selected");
+	}
+
+	// iosSlider callback for slide identifiers
+	Spreedia.changeSlideIdentifier = function(args){
+		args.settings.navSlideSelector.removeClass("selected")
+			.eq(args.currentSlideNumber - 1).addClass("selected");
 	}
 
 	

@@ -10,12 +10,12 @@ App::uses('AppController', 'Controller');
 
 class StoreinstancesController extends AppController {
 
-	public $name = 'Storeinstances';
-	public $scaffold;
-	public $cacheAction = true;
+	var $name = 'Storeinstances';
+	var $helpers = array('Html', 'Form');
+	// public $scaffold;
+	// public $cacheAction = true;
 
-	public function view($id, $format = 'list'){
-		$this->layout = 'basic';
+	public function view($id, $format = 'clean'){
 
 		// store info
 		$this->Storeinstance->recursive = 2; // TODO: contain, e.g. no need for "fromstore"

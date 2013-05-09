@@ -1,17 +1,41 @@
 {{#with page}}
 
-	<!-- page title -->
-	<div id='logo' class='green symbol'>L</div>
-	<h1 class='left'><span id='itemtype' class='dropdown hover'>Shops</span> in <span id='pagetitle' class='dropdown hover'>{{title}}</span></h1>
+	<!-- TODO: X button on onestore if there is a listing context -->
 
-	<!-- format -->
-	<ul id='format' class='symbol'>
+	<!-- LOGO -->
+	<div id='logo' class='green symbol'>L</div>
+
+	<!-- PAGE TITLE -->
+	<h1 class='left'>
+		{{#if_eq listingtype compare='multiple'}}
+			<span id='itemtype' class='dropdown hover'>Shops</span>
+			&nbsp;in&nbsp;
+			<span id='pagetitle' class='dropdown hover'>{{title}}</span>
+		{{else}}
+			<span id='pagetitle'>< Back to Location</span>
+			<!-- <span id='pagetitle'>{{title}}</span> -->
+		{{/if_eq}}
+	</h1>
+
+{{/with}}
+
+<!-- RIGHT SIDE -->
+{{#if_eq page.listingtype compare='multiple'}}
+	<!-- MANY STORES -->
+	<ul id='format' class='symbol right'>
 		<li class='hover format' data-activate='list'>i</li>
 		<li class='hover format' data-activate='map'>g</li>
 	</ul>
+{{else}}
+	<!-- ONE STORE -->
+	<!-- TODO!!!!!!!!!!! -->
+	<span id='topheart' class='right symbol hover click heartable' title='Add {{store.Storename.name}} to my favorite stores' data-storename='{{store.Storename.id}}'>f</span>
+{{/if_eq}}
+
+
 
 	<!-- format -->
-	<!-- <ul id='datatype' class='symbol'>
+	<!-- <ul id='datatype' class='symbol right'>
 		<li class='hover datatype' data-activate='favorites'>f</li>
 		<li class='hover datatype' data-activate='location'>q</li>
 	</ul> -->
@@ -41,5 +65,3 @@
 
 		</ul>
 	</nav> -->
-
-{{/with}}

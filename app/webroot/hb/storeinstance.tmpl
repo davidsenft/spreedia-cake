@@ -1,0 +1,53 @@
+{{#with store}}
+
+	
+	<div id='storetitle'>
+		<h2>{{Storename.name}}</h2>
+		<h3>
+			<!-- TODO: get this sub header direct from server -->
+			{{#if_gt Storename.Storeinstance.length compare=1}}
+				{{Storename.Storeinstance.length}} locations (<a>see all</a>)
+			{{else}}
+				{{Location.City.name}}, {{Location.City.state}}
+			{{/if_gt}}
+		</h3>
+	</div>
+	<p class='graphical'>
+		{{#each Storename.Icon}}
+			{{#icon this}}{{/icon}}
+		{{/each}}
+	</p>
+
+	<div class='clear'></div>
+
+	{{#with Storename}}
+		<div id='storeSlider' style='z-index:2'>
+			<div class='iosSlider'>
+				<div class='slider'>
+				{{#each Image}}
+					<div class='slide' title='{{this.credit}}'>{{#img900 this.name}}{{/img900}}</div>
+				{{/each}}
+				</div>
+			</div>
+		</div>
+
+		<p id='slidenav'>
+			{{#each Image}}<button class='awesome'>&nbsp;</button>&nbsp;{{/each}}
+		</p>
+
+		<p>{{this.description}}</p>
+	{{/with}}
+
+	<h4>Address</h4>
+
+	<p>
+		{{#with Storeinstance}}
+			Address: {{storeAddress1}} <a class='to_map'>See on map</a>
+			{{#if storeAddress2}}
+				<br>{{storeAddress2}}
+			{{/if}}
+		{{/with}}
+		<br><span class='citystate'>{{Location.City.name}}, {{Location.City.state}}</span> {{Storeinstance.storeZip}}
+	</p>
+
+{{/with}}

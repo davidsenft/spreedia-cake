@@ -1,8 +1,10 @@
-<div id='hb_top' class='alignright'></div>
+<div id='hb_top'></div>
+
+<div id="modal-back"></div>
 
 <div id='wrapper' class='center'>
 
-	<h1>HI THERE, WORLD</h1>
+	<div id='hb_storeinstance'></div>
 
 </div>
 
@@ -10,7 +12,8 @@
 <!-- HANDLEBARS TEMPLATES -->
 <!-- ******************************************************************** -->
 <?php 
-$this->Handlebars->template('top'); ?>
+$this->Handlebars->template('top');
+$this->Handlebars->template('storeinstance'); ?>
 
 <!-- ******************************************************************** -->
 <!-- EXTERNAL SCRIPTS -->
@@ -23,7 +26,7 @@ $this->Handlebars->template('top'); ?>
 <!-- INITIAL DATA LOAD (cacheable) -->
 <!-- ******************************************************************** -->
 
-<?php $this->Script->storeinstanceData($params); ?>
+<?php $this->Script->jsData($params); ?>
 
 
 <!-- ******************************************************************** -->
@@ -33,6 +36,7 @@ $this->Handlebars->template('top'); ?>
 <script type="text/javascript">
 
 $(document).ready(function(){
+	Spreedia.userid = <?php echo $_SESSION['Auth']['User']['id']; ?>;
 	Spreedia.init();
 });
 

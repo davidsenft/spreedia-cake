@@ -1,12 +1,12 @@
 {{#each stores}}
 	
-	<div id='store{{this.Storename.id}}' class='store inherit-match pricematch{{#each this.Icon}} icon-{{this.id}}{{/each}}' data-storename='{{this.Storename.id}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
+	<div id='store{{this.Storename.id}}' class='store inherit-match pricematch{{#each this.Icon}} icon-{{this.id}}{{/each}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
 
 		<!-- /* STORE INFORMATION ABOVE IMAGE */ -->
 		<div class='storeinfo right scale-text'>
 
 			<!-- /* HEART */ -->
-			<span class='right symbol hover click heartable' title='Add {{this.Storename.name}} to my favorite stores'>f</span>
+			<span class='right symbol hover click heartable' title='Add {{this.Storename.name}} to your favorite stores' data-storename='{{this.Storename.id}}'>f</span>
 
 			<!-- /* STORE TITLE AND COUNT */ -->
 			<h2>{{this.Storename.name}}
