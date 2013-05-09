@@ -137,4 +137,31 @@ class AppController extends Controller {
 		$this->set('_serialize', 'response');
     }
 
+    /* ******************************************************************** */
+	/* Spreedia's formatView()                                              */
+	/* This allows us to get js data, json, or data-less template all from  */
+	/* the same action by passing an extra optional 'format' parameter      */
+	/* ******************************************************************** */
+
+    protected function formatView($data, $page, $format){
+        if ($format == 'js'){
+            // initial external js data load (cacheable as html)
+			// TODO: would be nice if cached version were also served as js... .htaccess thing?
+			// TODO: make sure serving cached version as html works ok in various browsers
+            $this->RequestHandler->renderAs($this, 'js');
+            $this->setDataForView($data, $page);
+
+        }else if ($this->RequestHandler->responseType() == 'json'){
+            // subsequent ajax json requests (not cached)
+            // TODO: would be faaaannnnntastic if these could be cached 
+			// (would also make /js url and $format unnecessary)
+            $this->setDataForView($data, $page);
+
+        }else{
+        	// data-less template, only page info is set
+            $this->layout = 'basic';
+            $this->set('page', $page);
+        }
+    }
+
 }

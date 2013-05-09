@@ -66,27 +66,7 @@ class LocationsController extends AppController {
 	/* PRIVATE HELPERS */
 	/* ******************************************************************** */
 
-	private function formatView($loc, $page, $format){
-		if ($format == 'js'){
-			// initial external js data load (cacheable as html)
-			// TODO: would be nice if cached version were also served as js... .htaccess thing?
-			// TODO: make sure serving cached version as html works ok in various browsers
-			$this->RequestHandler->renderAs($this, 'js');
-			$this->setDataForView($loc, $page);
-
-		}else if ($this->RequestHandler->responseType() == 'json'){
-			// subsequent ajax json requests (not cached)
-			// TODO: would be faaaannnnntastic if these could be cached 
-			// (would also make /js url and $format unnecessary)
-			$this->setDataForView($loc, $page);
-
-		}else{
-			$this->layout = 'basic';
-			$this->set('page', $page);
-		}
-	}
-
-	private function setDataForView($loc, $page){
+	protected function setDataForView($loc, $page){
 		// TODO: move any of this to any Models?
 		// TODO: can we bypass some of this faster if location has no children?
 		// TODO: some way to do extendLocation or recursiveStoreInstances without passing loc since id has been set?

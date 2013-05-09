@@ -106,27 +106,7 @@ class UsersController extends AppController {
         $this->formatView($user, $page, $format);
     }
 
-    private function formatView($user, $page, $format){
-        if ($format == 'js'){
-            // initial external js data load (cacheable as html)
-            // TODO: would be nice if cached version were also served as js... .htaccess thing?
-            // TODO: make sure serving cached version as html works ok in various browsers
-            $this->RequestHandler->renderAs($this, 'js');
-            $this->setDataForView($user, $page);
-
-        }else if ($this->RequestHandler->responseType() == 'json'){
-            // subsequent ajax json requests (not cached)
-            // TODO: would be faaaannnnntastic if these could be cached 
-            // (would also make /js url and $format unnecessary)
-            $this->setDataForView($user, $page);
-
-        }else{
-            $this->layout = 'basic';
-            $this->set('page', $page);
-        }
-    }
-
-    private function setDataForView($user, $page){
+    protected function setDataForView($user, $page){
         $Icon = ClassRegistry::init('Icon');
         $icons = $Icon->find("all");
 
