@@ -365,6 +365,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 
 		// icons
+		// TODO: if we're not using loadPanel, this stuff still needs to happen elsewhere
 		console.log(" > checking icons...");
 		$("#iconspanel").find("button.icon").each(function(){
 			var $this = $(this);
@@ -401,9 +402,9 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// expanding TODO: are we still doing this?
 		// TODO: do this only for lists?
-		$(".expandable-for-verysmall").click(function(){
+		/* $(".expandable-for-verysmall").click(function(){
 			$(this).toggleClass("expanded");
-		});
+		}); */
 
 		// user preferences
 		// TODO: somehow get just user prefs related to this one location? b/c otherwise this is going ot get SLOW!!! (i think?)
@@ -445,7 +446,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		// click panel tabs to toggle on/off
 		// TODO: probably getting rid of this, but if not, only needs to be called once in init()
 		// TODO: also click should be delegated
-		$("#paneltabs dd a").click(function(){
+		/* $("#paneltabs dd a").click(function(){
 			$("#" + $(this).attr("data-panel") + "panel").toggleClass("on");
 		}); */
 

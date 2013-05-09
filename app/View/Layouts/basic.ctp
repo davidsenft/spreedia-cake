@@ -14,6 +14,7 @@
 <title><?php echo $page['seotitle']; ?></title>
 
 <?php
+// TODO: call once with an array?
 echo $this->Html->css('reset');
 echo $this->Html->css('jquery-ui-1.10.1.custom.min.css');
 echo $this->Html->css('spreedia');

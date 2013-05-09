@@ -286,9 +286,6 @@ button.icon.inactive.clicked {background-color:#ddd;color:#bbb;text-shadow:#fff 
     /* #paneltabs {height:40px;width:100%;}
     #paneltabs dd a {line-height:40px;} */
 
-    .expandable-for-verysmall {cursor:pointer;}
-    .expandable-for-verysmall .expand {display:none;}
-    .expandable-for-verysmall.expanded .expand {display:block;}
     .scale-text {font-size:0.9em;}
     .hide-for-small {display:none!important;}
     .hide-for-small-if-inactive {display:none!important;}
@@ -312,8 +309,6 @@ button.icon.inactive.clicked {background-color:#ddd;color:#bbb;text-shadow:#fff 
 
     .store div.storethumb {width:22%;}
     .store div.storeinfo {width:75%;padding-top:0;}
-    .expandable-for-verysmall {cursor:default;}
-    .expandable-for-verysmall .expand {display:block;}
     .pricerange {bottom:5px;}
     div.store {padding:15px;}
     div.store p.graphical {font-size:0.9em;}
