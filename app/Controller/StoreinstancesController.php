@@ -30,7 +30,9 @@ class StoreinstancesController extends AppController {
 
 		// set metas and page header stuff
 		$page = array(
-			'type' => "singlestore", // not using this yet
+			'datatype' => "storeinstance",
+			// 'id' => $store['Storename']['id'], // NOTE: that this is storename and not storeinstance (for hearting)
+			'listingtype' => "single",
 			'title' => $store['Storename']['name'].' ('.$store['Location']['name'].')',
 			'seotitle' => $store['Storename']['name'].' ('.$store['Location']['name'].') | Spreedia',
 			'format' => $format

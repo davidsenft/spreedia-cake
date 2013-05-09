@@ -46,7 +46,8 @@ class LocationsController extends AppController {
 		// set metas and page header stuff
 		$page = array(
 			'datatype' => 'location',
-			'type' => "manystores", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
+			// 'id' => $loc['Location']['id'],
+			'listingtype' => "multiple", 
 			'title' => /* "Shops in " . */ $title,
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format
