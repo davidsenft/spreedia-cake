@@ -28,13 +28,16 @@ function haversine(lat1,lng1,lat2,lng2){
 
 ;(function( Spreedia, $, undefined ) {
 
+	// helpful jquery body object
+	Spreedia.jbody = $("body");
+
 	// current app data
 	// TODO: can we get some of these from the body data attrs? or might they not have loaded?
 	Spreedia.context = false; // current stores data TODO: one for each datatype?
-	Spreedia.dataType = false; // "nearby", "search", "location", or "favorites"
-	Spreedia.format = false; // "list", "map", or "activity" // TODO: not using this yet!!
-	Spreedia.title = $("body").attr("data-title"); // page title
-	console.log("page title: " + Spreedia.title);
+	Spreedia.dataType = Spreedia.jbody.attr("data-datatype"); // "nearby", "search", "location", or "favorites"
+	Spreedia.format = Spreedia.jbody.attr("data-format"); // "list", "map", or "activity" // TODO: not using this yet!!
+	Spreedia.title = Spreedia.jbody.attr("data-title"); // page title
+	Spreedia.storeinstance = false;
 
 	// helpful globals
 	Spreedia.matchingstores = 0;
@@ -66,14 +69,10 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.init = function(){
 		// for debugging
 		console.log(Spreedia.context);
-		var jbody = $("body");
 		console.log(Spreedia.storeinstance);
 
 		// load current user data
 		Spreedia.loadUser();
-
-		// get initial datatype
-		Spreedia.dataType = jbody.attr("data-datatype");
 
 		switch (Spreedia.dataType){
 			case "location":
@@ -91,9 +90,9 @@ function haversine(lat1,lng1,lat2,lng2){
 		$(window).scroll(function () {
 			var offset = Spreedia.getScrollOffset();
 			if (offset > 0){
-				jbody.addClass("offset");
+				Spreedia.jbody.addClass("offset");
 			}else{
-				jbody.removeClass("offset");
+				Spreedia.jbody.removeClass("offset");
 			}
 		});
 
@@ -103,7 +102,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 
 		// body .click listener
-		jbody.on("click", ".click", function(){
+		Spreedia.jbody.on("click", ".click", function(){
 			$(this).toggleClass("clicked");
 
 		// these depend on 'clicked' being set first, so they have to go here
@@ -121,7 +120,7 @@ function haversine(lat1,lng1,lat2,lng2){
 			var modal_id = $(this).attr('data-modal');
 			console.log("opening " + modal_id + " modal...");
 			$("#" + modal_id).addClass("on");
-			jbody.addClass("modal-on");
+			Spreedia.jbody.addClass("modal-on");
 
 		});
 
@@ -196,14 +195,14 @@ function haversine(lat1,lng1,lat2,lng2){
 		switch (format){
 
 			case "list":
-				$("body").removeClass("map").addClass("list").attr("data-format", "list");
+				Spreedia.jbody.removeClass("map").addClass("list").attr("data-format", "list");
 				$("#list").show();
 				// TODO: only load storelist if it hasn't been loaded, or always load it?
 				break;
 
 			case "map":
 				/* TODO: don't go to map if no internet connection */
-				$("body").removeClass("list").addClass("map").attr("data-format", "map");
+				Spreedia.jbody.removeClass("list").addClass("map").attr("data-format", "map");
 				$("#map").show();
 				if (!Spreedia.map) Spreedia.initializeMap();
 				Spreedia.repositionMap();
@@ -212,7 +211,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// TODO: if this is only being used by #format li, simplify?
 		console.log(" > activating...");
-		$(".format").removeClass("active").filter("[data-activate='" + $("body").attr("data-format") + "']").addClass("active");
+		$(".format").removeClass("active").filter("[data-activate='" + Spreedia.jbody.attr("data-format") + "']").addClass("active");
 	
 		console.log("// end format");
 	}
@@ -236,7 +235,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.loadBreadcrumbs();
 		Spreedia.loadStoreList(); // TODO: move function here, or rename to loadLocation, or reuse it in initFavorites
 		
-		$("body").removeClass("icons-selected");
+		Spreedia.jbody.removeClass("icons-selected");
 		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
 
 		// add general listeners to loaded templates
@@ -256,7 +255,7 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
 		Spreedia.loadStoreList();
 
-		$("body").removeClass("icons-selected");
+		Spreedia.jbody.removeClass("icons-selected");
 		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
 
 		Spreedia.afterTemplates();
@@ -465,7 +464,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// determine and activate format
 		// TODO: is this the best place for this? after everything else?
-		Spreedia.setFormat($("body").attr("data-format"));
+		Spreedia.setFormat(Spreedia.jbody.attr("data-format"));
 
 		// determine and activate datatype?
 		// TODO: is this in the right place here?
@@ -849,13 +848,13 @@ function haversine(lat1,lng1,lat2,lng2){
 		$(".inherit-match").removeClass("matching").attr("data-matchcount", "0").find(".matchtext").html("");
 
 		// determine if there are now any icons selected at all
-		$("body").removeClass("icons-selected");
+		Spreedia.jbody.removeClass("icons-selected");
 		var icons_clicked = $("button.icon.clicked");
 		if(icons_clicked.length>0){
 
 			// there are some icons selected
 			console.log(" > " + icons_clicked.length + " total icon(s) selected...");
-			$("body").addClass("icons-selected");
+			Spreedia.jbody.addClass("icons-selected");
 
 			// update panel tab text TODO: there's gotta be a better/faster way
 			var icons_html = "";
