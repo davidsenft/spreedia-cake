@@ -111,6 +111,7 @@ class UsersController extends AppController {
         $Icon = ClassRegistry::init('Icon');
         $icons = $Icon->find("all");
 
+        // TODO: combine using 'compact'?
         $this->set('user', $user['User']);
         $this->set('icons', $icons);
         $this->set('stores', $user['Savedstore']);

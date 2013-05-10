@@ -64,7 +64,7 @@ class LocationsController extends AppController {
 	}
 
 	/* ******************************************************************** */
-	/* PRIVATE HELPERS */
+	/* PROTECTED HELPERS */
 	/* ******************************************************************** */
 
 	protected function setDataForView($loc, $page){
@@ -121,6 +121,7 @@ class LocationsController extends AppController {
 
 		// set view vars and serialize for json/ajax
 		// TODO: combine these into $context and use $this->respond($context)?
+		// TODO: or at least combine using 'compact'?
 		$this->set('location', $location);
 		$this->set('children', $children);
 		$this->set('icons', $icons);

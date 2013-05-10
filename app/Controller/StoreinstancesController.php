@@ -39,6 +39,7 @@ class StoreinstancesController extends AppController {
         $Icon = ClassRegistry::init('Icon');
         $icons = $Icon->find("all");
 
+        // TODO: combine using 'compact'?
         $this->set('store', $store);
 		$this->set('icons', $icons);
 		$this->set('page', $page);
