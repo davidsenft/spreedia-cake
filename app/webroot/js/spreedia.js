@@ -84,6 +84,9 @@ function haversine(lat1,lng1,lat2,lng2){
 			case "storeinstance":
 				Spreedia.initStoreInstance();
 				break;
+			case "page":
+				Spreedia.initPage();
+				break;
 		}
 
 		// white gradient at the top when scrolling
@@ -280,6 +283,20 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.initStoreSlider();
 
 		console.timeEnd('initStoreInstance');
+	}
+
+	Spreedia.initPage = function(){
+		console.log("initPage:");
+		console.time('initPage');
+
+		// TODO: this doesn't work at all
+		// if (!Spreedia.context) Spreedia.context = Spreedia.storeinstance;
+
+		Spreedia.loadTop();
+
+		Spreedia.afterTemplates();
+
+		console.timeEnd('initPage');
 	}
 
 	/*********************************************************** 

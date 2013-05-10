@@ -70,6 +70,31 @@ class PagesController extends AppController {
 			$title_for_layout = Inflector::humanize($path[$count - 1]);
 		}
 		$this->set(compact('page', 'subpage', 'title_for_layout'));
+
+		////
+		if (method_exists($this, $page)) { 
+			$this->$page(); 
+		}
+
 		$this->render(implode('/', $path));
 	}
+
+
+	public function home(){
+
+		$this->layout = 'basic';
+
+		$page = array(
+			'datatype' => 'page',
+			// 'id' => $loc['Location']['id'],
+			'listingtype' => "none", 
+			'title' => "The boutique guide",
+			'seotitle' => 'Spreedia | The Boutique Guide',
+			'format' => 'clean'
+		);
+
+		$this->set('page', $page);
+
+	}
+
 }
