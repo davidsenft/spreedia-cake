@@ -27,6 +27,15 @@ Handlebars.registerHelper('icon', function(context) {
 
 });
 
+/**
+ * Spreedia contains comparison helper
+ */
+Handlebars.registerHelper('if_contains', function(context, options) {
+	if (context.indexOf(options.hash.compare) >= 0) 
+		return options.fn(this);
+	return options.inverse(this);
+});
+
 /* ******************************************************************** */
 /* Comparison Handlebars Helpers by Dan Harper (http://github.com/danharper) */
 /* ******************************************************************** */

@@ -7,14 +7,13 @@
 
 	<!-- PAGE TITLE -->
 	<h1 class='left'>
-		{{#if_eq listingtype compare='multiple'}}
+		{{#if_contains listingtype compare='listing'}}
 			<span id='itemtype' class='dropdown hover'>Shops</span>
 			&nbsp;in&nbsp;
 			<span id='pagetitle' class='dropdown hover'>{{title}}</span>
 		{{else}}
-			<span id='pagetitle'>< Back to Location</span>
-			<!-- <span id='pagetitle'>{{title}}</span> -->
-		{{/if_eq}}
+			<span id='pagetitle'>{{title}}</span>
+		{{/if_contains}}
 	</h1>
 
 {{/with}}
