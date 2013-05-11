@@ -47,7 +47,7 @@ class LocationsController extends AppController {
 		$page = array(
 			'datatype' => 'location',
 			// 'id' => $loc['Location']['id'],
-			'listingtype' => "multiple", 
+			'listingtype' => "listing", 
 			'title' => /* "Shops in " . */ $title,
 			'seotitle' => $loc['Location']['name'] . ' | Spreedia',
 			'format' => $format

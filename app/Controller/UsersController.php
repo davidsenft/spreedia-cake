@@ -96,7 +96,7 @@ class UsersController extends AppController {
         $page = array(
             'datatype' => 'favorites',
             // 'id' => $user['User']['id'],
-            'listingtype' => "multiple", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
+            'listingtype' => "listing", // as opposed to a single "store" TODO: not using this yet... remove? or probably make it "location"
             'title' => $user['User']['handle'] . "'s Favorites",
             'seotitle' => 'Favorites | Spreedia',
             'format' => $format

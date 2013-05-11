@@ -1,6 +1,6 @@
 {{#each stores}}
 	
-	<div id='store{{this.Storename.id}}' class='store inherit-match pricematch{{#each this.Icon}} icon-{{this.id}}{{/each}}' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
+	<div id='store{{this.Storename.id}}' class='store inherit-match pricematch{{#each this.Icon}} icon-{{this.id}}{{/each}} hover' data-pricerange='{{this.Pricerange.id}}' data-iconcount="{{this.Icon.length}}" data-alphasort='{{this.Storename.name}}'>
 
 		<!-- /* STORE INFORMATION ABOVE IMAGE */ -->
 		<div class='storeinfo right above-image'>
@@ -42,7 +42,7 @@
 			<div class='storelocations'>
 
 			{{#each this.Localinstance}}
-				<div id='instance{{this.id}}' class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}'>
+				<div id='instance{{this.id}}' class='storeinstance' data-lat='{{this.lat}}' data-lng='{{this.lng}}' data-storeinstance='{{this.id}}'>
 					<h3 data-load-location='{{this.location_id}}'>{{this.locationName}}</h3>
 					<p>
 						Address: {{this.storeAddress1}} <a class='to_map'>See on map</a>

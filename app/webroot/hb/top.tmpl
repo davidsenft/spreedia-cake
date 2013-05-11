@@ -1,9 +1,10 @@
 {{#with page}}
 
 	<!-- TODO: X button on onestore if there is a listing context -->
+	<div id='goback'>&lt;</div>
 
 	<!-- LOGO -->
-	<div id='logo' class='green symbol'>L</div>
+	<div id='logo' class='symbol'>L</div>
 
 	<!-- PAGE TITLE -->
 	<h1 class='left'>
@@ -19,7 +20,7 @@
 {{/with}}
 
 <!-- RIGHT SIDE -->
-{{#if_eq page.listingtype compare='multiple'}}
+{{#if_eq page.listingtype compare='listing'}}
 	<!-- MANY STORES -->
 	<ul id='format' class='symbol right'>
 		<li class='hover format' data-activate='list'>i</li>

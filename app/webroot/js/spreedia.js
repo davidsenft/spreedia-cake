@@ -31,13 +31,12 @@ function haversine(lat1,lng1,lat2,lng2){
 	// helpful jquery body object
 	Spreedia.jbody = $("body");
 
-	// current app data
-	// TODO: can we get some of these from the body data attrs? or might they not have loaded?
-	Spreedia.context = false; // current stores data TODO: one for each datatype?
-	Spreedia.dataType = Spreedia.jbody.attr("data-datatype"); // "nearby", "search", "location", or "favorites"
-	Spreedia.format = Spreedia.jbody.attr("data-format"); // "list", "map", or "activity" // TODO: not using this yet!!
-	Spreedia.title = Spreedia.jbody.attr("data-title"); // page title
-	Spreedia.storeinstance = false;
+	// current app data objects
+	Spreedia.context = false; // TODO: one for each datatype?
+	Spreedia.storeinstance = false; // So that context isn't overwritten on ajax store loads
+
+	// we have to get this from PHP since it differs in js/json
+	Spreedia.format = Spreedia.jbody.data("format"); // "list", "map", or "activity"
 
 	// helpful globals
 	Spreedia.matchingstores = 0;
@@ -69,12 +68,21 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.init = function(){
 		// for debugging
 		console.log(Spreedia.context);
-		console.log(Spreedia.storeinstance);
+		// console.log(Spreedia.storeinstance);
+
+		// no need for this anymore
+		Spreedia.jbody.removeAttr("data-format");
 
 		// load current user data
 		Spreedia.loadUser();
 
-		switch (Spreedia.dataType){
+		// use storeinstance as context
+		// TODO: questionable. fetch top store context with Ajax? Get it in the first place?
+		if (!Spreedia.context && Spreedia.storeinstance) 
+			Spreedia.context = Spreedia.storeinstance;
+
+		// TODO: set a context if there isn't one? e.g. with storeinstances?
+		switch (Spreedia.context.page.datatype){
 			case "location":
 				Spreedia.initLocation();
 				break;
@@ -121,17 +129,21 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		}).on("click", ".modal-open", function(){
 			var modal_id = $(this).attr('data-modal');
-			console.log("opening " + modal_id + " modal...");
-			$("#" + modal_id).addClass("on");
-			Spreedia.jbody.addClass("modal-on");
+			Spreedia.openModal(modal_id);
+
+		}).on("click", ".store", function(){
+			// TODO: we're just loading the first instance... but that's a bit arbitrary
+			var id_to_load = $(this).find('.storeinstance').first().attr('data-storeinstance');
+			Spreedia.loadStoreinstanceDataById(id_to_load);
+
+		}).on("click", "#goback", function(){
+			Spreedia.unloadStoreinstance();
 
 		});
 
 		// close modal window
 		$("#modal-back").click(function(){
-			console.log("closing modal...");
-			$(".modal-on").removeClass("modal-on");
-			$(".modal").removeClass("on");
+			Spreedia.closeModals();
 		});
 
 		// resize page header
@@ -159,12 +171,12 @@ function haversine(lat1,lng1,lat2,lng2){
 			jtitle.text(shorter_title);
 			Spreedia.checkTitle(false);
 
-		}else if ((current_title != Spreedia.title) && allow_lengthening){
+		}else if ((current_title != Spreedia.context.page.title) && allow_lengthening){
 			// can we undo overflow?
 			clearTimeout(Spreedia.timer);
 			Spreedia.timer = setTimeout(function(){
 				// console.log(" > attempting to put the title back...");
-				jtitle.text(Spreedia.title);
+				jtitle.text(Spreedia.context.page.title);
 				Spreedia.checkTitle(false);
 			},300);
 		}
@@ -198,15 +210,23 @@ function haversine(lat1,lng1,lat2,lng2){
 		switch (format){
 
 			case "list":
-				Spreedia.jbody.removeClass("map").addClass("list").attr("data-format", "list");
+				Spreedia.jbody.removeClass("map").addClass("list");
+				Spreedia.format = "list";
 				$("#list").show();
 				// TODO: only load storelist if it hasn't been loaded, or always load it?
 				break;
 
 			case "map":
 				/* TODO: don't go to map if no internet connection */
-				Spreedia.jbody.removeClass("list").addClass("map").attr("data-format", "map");
+				Spreedia.jbody.removeClass("list").addClass("map");
+				Spreedia.format = "map";
 				$("#map").show();
+				if (!window.google){
+					// TODO: try to load google maps api, and if not, explain issue to user
+					$("#map_canvas").html("<div class='maperror'><h2>Crap.</h2><p>The map service is currently unavailable.<br><br>Are you connected to the internet?<br>If so, there may be a temporary issue. Check back in a few.</p></div>");
+					console.log("CANNOT LOAD GOOGLE MAPS!");
+					break;
+				}
 				if (!Spreedia.map) Spreedia.initializeMap();
 				Spreedia.repositionMap();
 				break;
@@ -214,7 +234,8 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// TODO: if this is only being used by #format li, simplify?
 		console.log(" > activating...");
-		$(".format").removeClass("active").filter("[data-activate='" + Spreedia.jbody.attr("data-format") + "']").addClass("active");
+		// TODO: use an id instead of data-activate attribute
+		$(".format").removeClass("active").filter("[data-activate='" + Spreedia.format + "']").addClass("active");
 	
 		console.log("// end format");
 	}
@@ -229,92 +250,82 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.initLocation = function(){
 		console.log("initLocation:");
 		console.time('initLocation');
-
-		// prepare location data for templates
 		Spreedia.prepareLocationData();
-
-		// load templates
-		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
-		Spreedia.loadBreadcrumbs();
-		Spreedia.loadStoreList(); // TODO: move function here, or rename to loadLocation, or reuse it in initFavorites
-		
+		Spreedia.loadTopTemplate();  // TODO: remove, move, or do conditionally
+		Spreedia.loadBreadcrumbsTemplate();
+		Spreedia.loadStoreListTemplate(); // TODO: move function here, or rename to loadLocation, or reuse it in initFavorites
 		Spreedia.jbody.removeClass("icons-selected");
-		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
-
-		// add general listeners to loaded templates
+		Spreedia.loadPanelTemplate();  // TODO: remove, move, or do conditionally
 		Spreedia.afterTemplates();
-
 		console.timeEnd('initLocation');
 	}
 
 	Spreedia.initFavorites = function(){
 		console.log("initFavorites:");
 		console.time('initFavorites');
-
-		// prepare favorites data for templates
 		Spreedia.prepareFavoritesData();
-
-		// load templates
-		Spreedia.loadTop();  // TODO: remove, move, or do conditionally
-		Spreedia.loadStoreList();
-
+		Spreedia.loadTopTemplate();  // TODO: remove, move, or do conditionally
+		Spreedia.loadStoreListTemplate();
 		Spreedia.jbody.removeClass("icons-selected");
-		Spreedia.loadPanel();  // TODO: remove, move, or do conditionally
-
+		Spreedia.loadPanelTemplate();  // TODO: remove, move, or do conditionally
 		Spreedia.afterTemplates();
-
 		console.timeEnd('initFavorites');
 	}
 
-	Spreedia.initStoreInstance = function(){
+	Spreedia.initStoreInstance = function(is_ajax){
 		console.log("initStoreInstance:");
 		console.time('initStoreInstance');
-
-		// if we already have context, keep it, but if not, the store is our context
-		// TODO: questionable. fetch top store context with Ajax? Get it in the first place?
-		if (!Spreedia.context) Spreedia.context = Spreedia.storeinstance;
-
-		Spreedia.loadTop();
-		Spreedia.loadStoreinstance();
-
+		if (is_ajax){
+			Spreedia.context.page.listingtype = "single listing";
+			$(".content_view").hide();
+			$("#panel").hide();
+			$("#storeinstance_ajax").show();
+		}
+		Spreedia.loadTopTemplate();
+		// TODO: if it's already loaded, just show() it?
+		Spreedia.loadStoreinstanceTemplate();
 		Spreedia.afterTemplates();
-
 		// TODO: could move this to afterTemplates()
 		Spreedia.initStoreSlider();
-
 		console.timeEnd('initStoreInstance');
+	}
+
+	// not technically an init, i don't care, shut up
+	Spreedia.unloadStoreinstance = function(){
+		Spreedia.logHeader("unloadStoreinstance:");
+		Spreedia.context.page.listingtype = "listing";
+		$("#storeinstance_ajax").hide(); // TODO: better to show/hide this or add/remove?
+		$("#" + Spreedia.format).show();
+		$("#panel").show();
+		// reload top template only
+		Spreedia.loadTopTemplate();
+		Spreedia.afterTemplates();
 	}
 
 	Spreedia.initPage = function(){
 		console.log("initPage:");
 		console.time('initPage');
-
-		// TODO: this doesn't work at all
+		// TODO: this doesn't work at all yet
 		// if (!Spreedia.context) Spreedia.context = Spreedia.storeinstance;
-
-		Spreedia.loadTop();
-
+		Spreedia.loadTopTemplate();
 		Spreedia.afterTemplates();
-
 		console.timeEnd('initPage');
 	}
 
 	/*********************************************************** 
 	 * AJAX DATA LOADS
-	 * These fetch json data, set Spreedia.context, and call a Data Load
+	 * These fetch json data, store it in Spreedia.context, and 
+	 * call the appropriate datatype init
 	 ***********************************************************/
 
 	// loads a location and stores resulting data in context
 	Spreedia.loadLocationDataById = function(id){
-
 		// TODO: all location just load their top(ish?) location, and then here, we first check if
 		// TODO: location is in the current chain, and if so just apply a show/hide filter!!
 		// TODO: maybe just like each loc has a city, each loc has a 'load' location to actually load?
-
 		Spreedia.logHeader("loadLocationDataById: " + id);
 		$.getJSON('/locations/view/' + id + '.json', function(result) {
 			Spreedia.context = result;
-			Spreedia.setDataType("location");
 			Spreedia.initLocation();
 		});
 	}
@@ -324,27 +335,50 @@ function haversine(lat1,lng1,lat2,lng2){
 		Spreedia.logHeader("loadFavoritesDataByUserId: " + id);
 		$.getJSON('/users/favorites/' + id + '.json', function(result) {
 			Spreedia.context = result;
-			Spreedia.setDataType("favorites");
 			Spreedia.initFavorites();
 		});
 	}
 
 	Spreedia.loadStoreinstanceDataById = function(id){
 		Spreedia.logHeader("loadStoreinstanceDataById: " + id);
-		// TODO
-	}
 
-	// called by Ajax Data Loads
-	Spreedia.setDataType = function(datatype){
-		Spreedia.dataType = datatype;
-		Spreedia.jbody.attr("data-datatype", datatype);
-	}
+		if (Spreedia.context.store){
+			if (Spreedia.context.store.Storeinstance.id == id){
+				// TODO: save more than just the most recent store?
+				console.log(" > we've already got that store's data!");
+				// TODO: wouldn't this mean we could just show the storeinstance_ajax div?
+				Spreedia.initStoreInstance(true);
+				return;
+			}
+		}
 
-	// called by Ajax Data Loads
-	Spreedia.logHeader = function(msg){
-		console.log("------------------------------------");
-		console.log(msg);
-		console.log("------------------------------------");
+		// if we don't already have the store's info
+		$.getJSON('/storeinstances/view/' + id + '.json', function(result) {
+			Spreedia.context.store = result.store;
+			Spreedia.initStoreInstance(true);
+
+		}).fail(function( jqxhr, textStatus, error ) {
+			console.log(jqxhr);
+  			if (error = "Forbidden"){
+  				// force login
+  				// TODO: can this happen for any other reason?
+  				console.log("NOT LOGGED IN!");
+				Spreedia.promptLogin();
+  			}else{
+  				// TODO: handle other errors?
+  			}
+		});
+
+		/* TODO: what's going on.
+		console.log(result);
+
+		if (result.status == 403){
+			// TODO: we're not logged in! redirect to login!
+			// TODO: make this a routine?
+			// TODO: some way to log for requests via ajax?
+			console.log("NOT LOGGED IN!");
+			Spreedia.promptLogin();
+		} */
 	}
 
 	/*********************************************************** 
@@ -353,9 +387,9 @@ function haversine(lat1,lng1,lat2,lng2){
 	 ***********************************************************/
 
 	// TODO
-	Spreedia.loadStoreinstance = function(){
+	Spreedia.loadStoreinstanceTemplate = function(){
 		// handlebars template
-		Spreedia.handle("storeinstance","storeinstance");
+		Spreedia.handle("storeinstance");
 
 	}
 
@@ -364,7 +398,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	// the panel based on location's json, so we don't need to load it with new location data, we can just
 	// load it once... if we decide to do all icon<->store processing in js, for example, then we should
 	// get rid of loadPanel or at least not call it every single time we do a new data load
-	Spreedia.loadPanel = function(){
+	Spreedia.loadPanelTemplate = function(){
 		// handlebars template
 		Spreedia.handle("panel");
 		
@@ -395,7 +429,7 @@ function haversine(lat1,lng1,lat2,lng2){
 	};
 
 	// Called by initLocation()
-	Spreedia.loadTop = function(){
+	Spreedia.loadTopTemplate = function(){
 		// handlebars template
 		Spreedia.handle("top");
 
@@ -405,13 +439,13 @@ function haversine(lat1,lng1,lat2,lng2){
 		});
 	};
 
-	Spreedia.loadBreadcrumbs = function(){
+	Spreedia.loadBreadcrumbsTemplate = function(){
 		// handlebars template
 		Spreedia.handle("breadcrumbs");
 	};
 
 	// Called by initLocation()
-	Spreedia.loadStoreList = function(){
+	Spreedia.loadStoreListTemplate = function(){
 
 		// handlebars template
 		// TODO: should we put this off if currently in map format?
@@ -435,11 +469,12 @@ function haversine(lat1,lng1,lat2,lng2){
 	// handle template 'name' with context 'context' (Spreedia.context by default)
 	// 'context' here is a string representing a Spreedia property, not the object itself
 	// TODO: see if Spreedia has a property that matches name, and if so, use that for the context
-	Spreedia.handle = function(name, context){
-		if (!context || !Spreedia.hasOwnProperty(context)) context = "context";
+	// TODO: option to load some things into #wrapper instead of #hb_[name]?
+	Spreedia.handle = function(name){ // , context){
+		// if (!context || !Spreedia.hasOwnProperty(context)) context = "context";
 		console.log(" > loading '" + name + "' template...");
 		var template = Handlebars.compile($("#" + name + "-template").html());
-		var html = template(Spreedia[context]);
+		var html = template(Spreedia.context); // Spreedia[context]
 		$("#hb_" + name).html(html);
 	};
 
@@ -447,10 +482,20 @@ function haversine(lat1,lng1,lat2,lng2){
 	 * MISCELLANY / HELPERS / ONE-OFFS
 	 ***********************************************************/
  
+	Spreedia.updateBodyClasses = function(){
+		console.log(" > updating body classes...");
+		Spreedia.jbody.removeClass();
+		Spreedia.jbody.addClass(Spreedia.context.page.listingtype);
+		Spreedia.jbody.addClass(Spreedia.context.page.datatype);
+		Spreedia.jbody.addClass(Spreedia.format);
+	}
+
 	// Called by initLocation() and initFavorites() after templates have been loaded
 	Spreedia.afterTemplates = function(){
 		console.log("afterTemplates:");
 		console.log(" > adding listeners to loaded templates...");
+
+		Spreedia.updateBodyClasses();
 
 		// anything with .hover class gets .over class on hover
 		// TODO: make sure this isn't being added multiple times to the same elements
@@ -482,10 +527,12 @@ function haversine(lat1,lng1,lat2,lng2){
 
 		// determine and activate format
 		// TODO: is this the best place for this? after everything else?
-		Spreedia.setFormat(Spreedia.jbody.attr("data-format"));
+		if (Spreedia.context.page.listingtype == "listing"){
+			Spreedia.setFormat(Spreedia.format);
+		}
 
-		// determine and activate datatype?
-		// TODO: is this in the right place here?
+		// scroll to top
+		window.scrollTo(0,0);
 		
 	}
 
@@ -1101,6 +1148,30 @@ function haversine(lat1,lng1,lat2,lng2){
 	Spreedia.changeSlideIdentifier = function(args){
 		args.settings.navSlideSelector.removeClass("selected")
 			.eq(args.currentSlideNumber - 1).addClass("selected");
+	}
+
+	// for pretty console logging, called by Ajax Data Loads
+	Spreedia.logHeader = function(msg){
+		console.log("------------------------------------");
+		console.log(msg);
+		console.log("------------------------------------");
+	}
+
+	Spreedia.openModal = function(id){
+		Spreedia.closeModals();
+		console.log("opening " + id + " modal...");
+		$("#" + id).addClass("on");
+		Spreedia.jbody.addClass("modal-on");
+	}
+
+	Spreedia.closeModals = function(){
+		console.log("closing open modal(s)...");
+		$(".modal").removeClass("on");
+		Spreedia.jbody.removeClass("modal-on");
+	}
+
+	Spreedia.promptLogin = function(){
+		Spreedia.openModal("login-modal");
 	}
 
 	

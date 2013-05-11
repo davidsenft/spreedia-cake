@@ -12,6 +12,11 @@
 
 <div id="modal-back"></div>
 
+<div id='login-modal' class='modal' style='display:none;'>
+	<h2>Please Log In</h2>
+	<p>Yeah.</p>
+</div>
+
 <div id='wrapper' class='center'>
 
 	<!-- <div id='hb_location'></div> -->
@@ -39,6 +44,10 @@
 		<div id='hb_storelist'></div>
 	</div>
 
+	<div id='storeinstance_ajax'>
+		<div id='hb_storeinstance'></div>
+	</div>
+
 </div>
 
 <!-- ******************************************************************** -->
@@ -49,6 +58,7 @@ $this->Handlebars->template('top');
 $this->Handlebars->template('breadcrumbs');
 $this->Handlebars->template('location');
 $this->Handlebars->template('storelist');
+$this->Handlebars->template('storeinstance');
 $this->Handlebars->template('panel'); ?>
 
 <!-- ******************************************************************** -->
